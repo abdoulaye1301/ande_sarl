@@ -414,7 +414,7 @@ if menu == "AGREGATION":
                 wrapped_comment = textwrap.fill(commentaire, width=45)
                 ax.text(0.8, 0.88, wrapped_comment,
                 transform=ax.transAxes,
-                fontsize=11,
+                fontsize=14,
                 weight='bold',
                 va='center',
                 ha='center',
