@@ -242,19 +242,13 @@ if menu == "AGREGATION":
 #-----------------------------------------------------------------#
         st.sidebar.markdown("---")
         password = st.sidebar.text_input("Veuillez entrer le code d'accès", type="password")
-        #OMAR = st.secrets["credentials"]["omar"]
-        OMAR="OMAR26"
-        MANSOUR="MANSOUR26"
-        DJIBRIL="DJIBRIL26"
-        #MANSOUR = st.secrets["credentials"]["mansour"]
-        #DJIBRIL = st.secrets["credentials"]["djibril"]
-        #IBRAHIMA = st.secrets["credentials"]["ibrahima"]
-        #POUYE = st.secrets["credentials"]["pouye"]
+        OMAR = st.secrets["credentials"]["omar"]
+        MANSOUR = st.secrets["credentials"]["mansour"]
 
         st.markdown(f"<h4 style='text-align: center;'>!---------- Stock restant après les ventes du {datea} ----------!</h4><br>", unsafe_allow_html=True)
-        if password in [OMAR, MANSOUR, DJIBRIL]:
+        if password in [OMAR, MANSOUR]:
         
-            if password == OMAR or password == DJIBRIL:
+            if password == OMAR:
                 st.success("Accès autorisé, vous êtes connectés avec les identifiants de "+("OMAR" if password == OMAR else "DJIBRIL"))
                 #if sous_menu=="Stock":
                  #       prom = colone[3].selectbox("", ["TATA 1", "TATA 2", "TATA 3","Tous les TATAS"])
@@ -733,14 +727,11 @@ elif menu == "FICHE":
     if periode == "Semaine":
         st.sidebar.markdown("---")
         password = st.sidebar.text_input("Code d'accès requis", type="password")
-        OMAR="OMAR26"
-        MANSOUR="MANSOUR26"
-        DJIBRIL="DJIBRIL26"
-        #OMAR = st.secrets["credentials"]["omar"]
-        #MANSOUR = st.secrets["credentials"]["mansour"]
-        #DJIBRIL = st.secrets["credentials"]["djibril"]
+        
+        OMAR = st.secrets["credentials"]["omar"]
+        MANSOUR = st.secrets["credentials"]["mansour"]
 
-        if password in [MANSOUR, OMAR,DJIBRIL]:
+        if password in [MANSOUR, OMAR]:
             st.success(f"ACCES AUTORISE POUR {password}")
             data_semaine = Donnees_Mens[
                 (Donnees_Mens["Numero_semaine"] == semaine) &
@@ -910,7 +901,7 @@ elif menu == "FICHE":
                 mime="application/pdf"
             )
         
-        if password in [OMAR, DJIBRIL]:
+        if password == OMAR:
 
                 donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Semaine"] == semaine) & (donnee_RZ["Equipe"] == "RZ")]
                 CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()
@@ -933,14 +924,11 @@ elif menu == "FICHE":
     elif periode == "Mois":
         st.sidebar.markdown("---")
         password = st.sidebar.text_input("Code d'accès requis", type="password")
-        OMAR="OMAR26"
-        MANSOUR="MANSOUR26"
-        DJIBRIL="DJIBRIL26"
-        #OMAR = st.secrets["credentials"]["omar"]
-        #MANSOUR = st.secrets["credentials"]["mansour"]
-        #DJIBRIL = st.secrets["credentials"]["djibril"]
+        
+        OMAR = st.secrets["credentials"]["omar"]
+        MANSOUR = st.secrets["credentials"]["mansour"]
 
-        if password in [MANSOUR, OMAR, DJIBRIL]:
+        if password in [MANSOUR, OMAR]:
             st.success(f"ACCES AUTORISE POUR {password}")
             data_mois = Donnees_Mens[
                 (Donnees_Mens["Mois"] == mois) &
@@ -1084,7 +1072,7 @@ elif menu == "FICHE":
                 file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} AU {jour_max:02d} {mois_num}.pdf",
                 mime="application/pdf"
             )
-        if password in [OMAR, DJIBRIL]:
+        if password == OMAR:
                 donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Mois"] == mois) & (donnee_RZ["Equipe"] == "RZ")]
                 CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()
 
