@@ -8,7 +8,7 @@ import textwrap
 import matplotlib.pyplot as plt
 from openpyxl import load_workbook
 from io import BytesIO
-
+from matplotlib.image import imread
 
 st.set_page_config(
     page_title="Ingénieur NDAO", layout="wide", page_icon="ndao abdoulaye.png"
@@ -244,7 +244,8 @@ if menu == "AGREGATION":
         password = st.sidebar.text_input("Veuillez entrer le code d'accès", type="password")
         OMAR = st.secrets["credentials"]["omar"]
         MANSOUR = st.secrets["credentials"]["mansour"]
-
+        #OMAR=""
+        #MANSOUR=""
         st.markdown(f"<h4 style='text-align: center;'>!---------- Stock restant après les ventes du {datea} ----------!</h4><br>", unsafe_allow_html=True)
         if password in [OMAR, MANSOUR]:
         
@@ -394,7 +395,7 @@ if menu == "AGREGATION":
             else:
                 df_final_total1 = df_final_total.copy()
 
-            def generate_png_report(df, date_str, zone_str, nb_promoteurs, commentaire):
+            def generate_png_report(df, date_str, zone_str, nb_promoteurs, commentaire,chiffre_affaires):
                 fig, ax = plt.subplots(figsize=(12, len(df) * 0.6+1.5))
                 ax.axis('off')
                 if commentaire:
@@ -405,7 +406,7 @@ if menu == "AGREGATION":
                         boxstyle="round,pad=0.01",
                         transform=ax.transAxes,
                         linewidth=1,
-                        edgecolor='gray',
+                        edgecolor='#008000',
                         facecolor='#f0f0f0',
                         zorder=1
                     )
@@ -427,22 +428,57 @@ if menu == "AGREGATION":
                 header_width = 0.996
                 header_height = 0.24
 
-                rect = Rectangle((header_x, header_y), header_width, header_height,
-                                transform=ax.transAxes,
-                                fill=False, color='black', linewidth=1.5)
+            
+                rect = Rectangle(
+                    (header_x, header_y),
+                    header_width,
+                    header_height,
+                    transform=ax.transAxes,
+                    fill=False,
+                    edgecolor='#008000',
+                    linewidth=1.8
+                )
                 ax.add_patch(rect)
-                
-                plt.text(0.45, 0.95, f"Rapport de Stock du TATA", ha='center', fontsize=14, transform=ax.transAxes, weight='bold')
+
+                plt.text(0.45, 0.95, f"Rapport promotion", ha='center', fontsize=14, transform=ax.transAxes, weight='bold')
                 plt.text(0.01, 0.89, f"Date : {date_str}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
                 plt.text(0.01, 0.84, f"Zone : {zone_str}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
                 plt.text(0.01, 0.79, f"Nombre de promoteurs : {nb_promoteurs}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
+                # Logo placé au milieu, entre les informations et le commentaire
+                chemin_logo = "logo_ande.jpeg"
 
+                try:
+                    logo = imread(chemin_logo)
+
+                    # Position du logo dans la zone d'en-tête
+                    logo_ax = fig.add_axes([0.43, 0.710, 0.12, 0.12])
+                    logo_ax.imshow(logo)
+                    logo_ax.axis("off")
+
+                except FileNotFoundError:
+                    print(f"Logo introuvable : {chemin_logo}")
                 table = ax.table(cellText=df.values,
                                 colLabels=df.columns,
                                 cellLoc='center',
                                 loc='center')
+                
+                # Mettre les noms des colonnes en gras
+                for j in range(len(df.columns)):
+                    cell = table[0, j]
+                    cell.set_text_props(weight='bold')
+                    cell.set_facecolor('#D9F2E6')  # Vert clair facultatif
+                    cell.set_edgecolor('#008000')
+                    cell.set_linewidth(1.2)
+
 
                 table.scale(1, 1.5)
+                # Mettre toutes les bordures du tableau en vert
+                for cell in table.get_celld().values():
+                    cell.set_edgecolor('#008000')
+                    cell.set_linewidth(1.2)
+                # Réserver un espace en bas pour le chiffre d'affaires
+                plt.subplots_adjust(bottom=0.15)
+
 
                 stock_col_idx = df.columns.get_loc("Stock Restant")
                 for i in range(len(df)):
@@ -456,8 +492,24 @@ if menu == "AGREGATION":
                 for j in range(len(df.columns)):
                     cell = table[total_row_index, j]
                     cell.set_text_props(weight='bold')
-                    cell.set_facecolor('#FFA500')
-                    
+                    cell.set_facecolor("#74E9A3")
+                # Chiffre d'affaires réalisé, centré sous le tableau
+                chiffre_affaires_formate = f"{chiffre_affaires:,.0f}".replace(",", " ")
+
+                fig.text(
+                    0.5, 0.055,
+                    f"Chiffre d'affaires réalisé : {chiffre_affaires_formate} FCFA",
+                    ha="center",
+                    va="center",
+                    fontsize=12,
+                    weight="bold",
+                    color="#006400",
+                    bbox=dict(
+                        boxstyle="round,pad=0.4",
+                        facecolor="#E8F5E9",
+                        edgecolor="#74E9A3"
+                    )
+                )
                 buffer = BytesIO()
                 plt.savefig(buffer, format='png', bbox_inches='tight', dpi=200)
                 plt.close()
@@ -474,6 +526,7 @@ if menu == "AGREGATION":
                     zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
                     nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
                     commente = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat)]["Commentaire"].dropna().unique().tolist()
+                    ca_realise = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Operation'] == "Vente")]["Montant"].sum()
             elif periode == "Semaine":
                 #if prom == "Tous les TATAS":
                  #   zone_str = "Toutes les zones"
@@ -484,6 +537,7 @@ if menu == "AGREGATION":
                     zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
                     nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
                     commente = Chargement[(Chargement["Numero_semaine"] == semaine)]["Commentaire"].dropna().unique().tolist()
+                    ca_realise = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Operation'] == "Vente")]["Montant"].sum()
             elif periode == "Mois":
                 #if prom == "Tous les TATAS":
                  #   zone_str = "Toutes les zones"
@@ -494,10 +548,11 @@ if menu == "AGREGATION":
                     zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
                     nb_promoteurs = len(Chargement[(Chargement["Mois"] == mois) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
                     commente = Chargement[(Chargement["Mois"] == mois)]["Commentaire"].dropna().unique().tolist()
+                    ca_realise = Chargement[(Chargement["Mois"] == mois) & (Chargement['Operation'] == "Vente")]["Montant"].sum()
             if not commente: 
                 commente.append("Aucune observation") 
 
-            png_bytes = generate_png_report(df_final_total1, datea, zone_str, nb_promoteurs, commente[0])
+            png_bytes = generate_png_report(df_final_total1, datea, zone_str, nb_promoteurs, commente[0], ca_realise)
             st.image(png_bytes, caption="", use_container_width=True)
             st.download_button(
                 label="📥 Télécharger le rapport en PNG",
@@ -730,7 +785,8 @@ elif menu == "FICHE":
         
         OMAR = st.secrets["credentials"]["omar"]
         MANSOUR = st.secrets["credentials"]["mansour"]
-
+        #OMAR=""
+        #MANSOUR=""
         if password in [MANSOUR, OMAR]:
             st.success(f"ACCES AUTORISE POUR {password}")
             data_semaine = Donnees_Mens[
@@ -927,7 +983,8 @@ elif menu == "FICHE":
         
         OMAR = st.secrets["credentials"]["omar"]
         MANSOUR = st.secrets["credentials"]["mansour"]
-
+        #OMAR=""
+        #MANSOUR=""
         if password in [MANSOUR, OMAR]:
             st.success(f"ACCES AUTORISE POUR {password}")
             data_mois = Donnees_Mens[
