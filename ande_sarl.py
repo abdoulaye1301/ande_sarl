@@ -524,7 +524,7 @@ if menu == "AGREGATION":
                 #else:
                     zone_vals = Chargement[ (Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat)]["zone"].dropna().unique()
                     zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
-                    nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())+1
+                    nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
                     commente = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat)]["Commentaire"].dropna().unique().tolist()
                     ca_realise = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Operation'] == "Vente")]["Montant"].sum()
             elif periode == "Semaine":
