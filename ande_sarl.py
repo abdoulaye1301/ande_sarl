@@ -21,8 +21,8 @@ st.logo(profil)
 # ========================REMPLISSAGE PROMOTEUR================================#
 
 #Chargement = pd.read_excel("Donnees_Promoteurs.xlsx", engine='openpyxl')
-donnee_promoteur_ande=pd.ExcelFile("https://kf.kobotoolbox.org/api/v2/assets/afxRhMSWSYvHTNh8VJJ6Q8/export-settings/esgmhxWNou7EgDaaTirMNgU/data.xlsx", engine='openpyxl')
-Chargement = []
+donnee_promoteur_ande=pd.ExcelFile("https://kf.kobotoolbox.org/api/v2/assets/afxRhMSWSYvHTNh8VJJ6Q8/export-settings/esgmhxWNou7EgDaaTirMNgU/data.xlsx")
+
 
 # Charger le fichier Excel
 
