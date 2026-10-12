@@ -440,7 +440,7 @@ if menu == "AGREGATION":
                 )
                 ax.add_patch(rect)
 
-                plt.text(0.45, 0.95, f"Rapport promotion", ha='center', fontsize=14, transform=ax.transAxes, weight='bold')
+                plt.text(0.45, 0.95, f"Rapport Promotion - ANDE", ha='center', fontsize=14, transform=ax.transAxes, weight='bold')
                 plt.text(0.01, 0.89, f"Date : {date_str}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
                 plt.text(0.01, 0.84, f"Zone : {zone_str}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
                 plt.text(0.01, 0.79, f"Nombre de promoteurs : {nb_promoteurs}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
