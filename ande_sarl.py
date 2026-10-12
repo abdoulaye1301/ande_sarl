@@ -155,15 +155,21 @@ if periode == "Jour":
     dat = colone[4].selectbox("", min_date)
     datea = dat.strftime("%d-%m-%Y")
     statio = Chargement[(Chargement["Date"] == dat)]
+    stationnement = Team_Leader[(Team_Leader["Date"] == dat)]
+    transport = Team_Leader[(Team_Leader["Date"] == dat)]
     donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Date"] == dat)]
 elif periode == "Semaine":
     semaine = colone[2].selectbox("", num_semaine)
     statio = Chargement[(Chargement["Numero_semaine"] == semaine)]
+    stationnement = Team_Leader[(Team_Leader["Numero_semaine"] == semaine)]
+    transport = Team_Leader[(Team_Leader["Numero_semaine"] == semaine)]
     datea = semaine
     donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Numero_semaine"] == semaine)]
 elif periode == "Mois":
     mois = colone[2].selectbox("", Chargement["Mois"].unique())
     statio = Chargement[(Chargement["Mois"] == mois)]
+    stationnement = Team_Leader[(Team_Leader["Mois"] == mois)]
+    transport = Team_Leader[(Team_Leader["Mois"] == mois)]
     datea = mois
     donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Mois"] == mois)]
 #-----------------------------------------------------------------#
@@ -187,9 +193,9 @@ if menu == "AGREGATION":
 
         colone= st.columns(3)
         #colone[0].metric("💴 CA TATA 1", f"{donnee_ordre[donnee_ordre['tata'] =='TATA 1']['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
-        colone[0].metric("💴 Chiffre d'affaires", f"{donnee_ordre[donnee_ordre['tata'] =='TATA 2']['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
-        colone[1].metric("🚐 Transport", f"{statio[statio['tata'] =='TATA 2']['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
-        colone[2].metric("🅿️ Stationnement", f"{statio[statio['tata'] =='TATA 2']['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
+        colone[0].metric("💴 Chiffre d'affaires", f"{donnee_ordre['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
+        colone[1].metric("🚐 Transport", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
+        colone[2].metric("🅿️ Stationnement", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
         
 
     elif sous_menu == "Stock Départ" and periode == "Semaine":
@@ -240,15 +246,13 @@ if menu == "AGREGATION":
         OMAR="OMAR26"
         MANSOUR="MANSOUR26"
         DJIBRIL="DJIBRIL26"
-        IBRAHIMA="IBRAHIMA26"
-        POUYE="POUYE26"
         #MANSOUR = st.secrets["credentials"]["mansour"]
         #DJIBRIL = st.secrets["credentials"]["djibril"]
         #IBRAHIMA = st.secrets["credentials"]["ibrahima"]
         #POUYE = st.secrets["credentials"]["pouye"]
 
         st.markdown(f"<h4 style='text-align: center;'>!---------- Stock restant après les ventes du {datea} ----------!</h4><br>", unsafe_allow_html=True)
-        if password in [OMAR, MANSOUR, DJIBRIL, IBRAHIMA, POUYE]:
+        if password in [OMAR, MANSOUR, DJIBRIL]:
         
             if password == OMAR or password == DJIBRIL:
                 st.success("Accès autorisé, vous êtes connectés avec les identifiants de "+("OMAR" if password == OMAR else "DJIBRIL"))
@@ -551,8 +555,8 @@ if menu == "AGREGATION":
         ca_restant=descente_T2["Montant"].sum()
         rest=stock_descente_T2.sum()
 
-        colonnne[0].metric("🚐 Transport TATA", f"{statio['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
-        colonnne[1].metric("🅿️ Stationnement", f"{statio['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
+        colonnne[0].metric("🚐 Transport TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
+        colonnne[1].metric("🅿️ Stationnement", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
         colonnne[0].metric("🏠 **Stock Restant (CA)**", f"{ca_restant:,.2f}".replace(",", " ")+" XOF")
         colonnne[1].metric("🏠 **Quantité Restante (STOCK)**", f"{rest:,.2f}".replace(",", " "))
     
@@ -917,11 +921,11 @@ elif menu == "FICHE":
                 colonnne[0].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
                 colonnne[1].metric("REMISE", f"{donnee_RZ_Livr["Remise"].sum():,.2f}".replace(",", " ")+" XOF")
 
-                colonnne[0].metric("TRANSPORT TATA", f"{statio['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
-                colonnne[1].metric("STATIONNEMENT", f"{statio['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
+                colonnne[0].metric("TRANSPORT TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
+                colonnne[1].metric("STATIONNEMENT", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
                 st.markdown("---")
                 st.markdown(f"<h4 style='text-align: center;'>SALAIRES TATAS : {total:,.2f}".replace(",", " ")+" XOF</h4>", unsafe_allow_html=True)
-                Depenses = statio["Transport"].sum() + statio["Stationnement"].sum() + total
+                Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
                 st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
                 
                 mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - (Depenses + donnee_RZ_Livr["Remise"].sum())
@@ -1090,11 +1094,11 @@ elif menu == "FICHE":
                 colonnne[2].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
                 colonnne[0].metric("REMISE", f"{donnee_RZ_Livr["Remise"].sum():,.2f}".replace(",", " ")+" XOF")
 
-                colonnne[1].metric("TRANSPORT TATA", f"{statio['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
-                colonnne[2].metric("STATIONNEMENT", f"{statio['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
+                colonnne[1].metric("TRANSPORT TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
+                colonnne[2].metric("STATIONNEMENT", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
                 st.markdown("---")
                 st.markdown(f"<h4 style='text-align: center;'>SALAIRES TATAS : {total:,.2f}".replace(",", " ")+" XOF</h4>", unsafe_allow_html=True)
-                Depenses = statio["Transport"].sum() + statio["Stationnement"].sum() + total
+                Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
                 st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
                 
                 mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - (Depenses + donnee_RZ_Livr["Remise"].sum())
