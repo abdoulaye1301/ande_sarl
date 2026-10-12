@@ -396,7 +396,7 @@ if menu == "AGREGATION":
                 df_final_total1 = df_final_total.copy()
 
             def generate_png_report(df, date_str, zone_str, nb_promoteurs, commentaire,chiffre_affaires):
-                fig, ax = plt.subplots(figsize=(14, len(df) * 0.6+1.5))
+                fig, ax = plt.subplots(figsize=(12, len(df) * 0.6+1.5))
                 ax.axis('off')
                 if commentaire:
                     comment_box = FancyBboxPatch(
