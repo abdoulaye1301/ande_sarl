@@ -958,14 +958,14 @@ elif menu == "FICHE":
             st.download_button(
                 label="📥 Télécharger la fiche de paie PDF",
                 data=pdf_file,
-                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} {mois_num} AU {jour_max:02d} {mois_max} {annee}.pdf",
+                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} {mois_num} AU {jour_max:02d} {mois_lettre_max} {annee}.pdf",
                 mime="application/pdf"
             )
         else:
             st.download_button(
                 label="📥 Télécharger la fiche de paie PDF",
                 data=pdf_file,
-                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} AU {jour_max:02d} {mois_num}.pdf",
+                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} AU {jour_max:02d} {mois_lettre}.pdf",
                 mime="application/pdf"
             )
         
@@ -1131,14 +1131,14 @@ elif menu == "FICHE":
             st.download_button(
                 label="📥 Télécharger la fiche de paie PDF",
                 data=pdf_file,
-                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} {mois_num} AU {jour_max:02d} {mois_max} {annee}.pdf",
+                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} {mois_num} AU {jour_max:02d} {mois_lettre_max} {annee}.pdf",
                 mime="application/pdf"
             )
         else:
             st.download_button(
                 label="📥 Télécharger la fiche de paie PDF",
                 data=pdf_file,
-                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} AU {jour_max:02d} {mois_num}.pdf",
+                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} AU {jour_max:02d} {mois_lettre}.pdf",
                 mime="application/pdf"
             )
         if password == OMAR:
