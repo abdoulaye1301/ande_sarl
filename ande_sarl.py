@@ -1064,7 +1064,7 @@ elif menu == "FICHE":
             tata_text = Paragraph(f"<b>TATA</b>", styles["Heading2"])
             header_table = Table(
                 [[logo, tata_text]],
-                colWidths=[14*cm, 3*cm]
+                colWidths=[14*cm, 14*cm]
             )
             header_table.setStyle([
                 ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
@@ -1105,11 +1105,11 @@ elif menu == "FICHE":
             table = Table(data, colWidths=[6.5*cm, 4*cm, 3*cm, 2.5*cm])
             table.setStyle(TableStyle([
                 ('GRID', (0,0), (-1,-1), 1, colors.black),
-                ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#567D50")),
+                ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#AAFA9F")),
                 ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#D7D2C9")),
                 ('TEXTCOLOR', (0,0), (-1,0), colors.black),
                 ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-                ('BACKGROUND', (1,0), (1,0), colors.HexColor("#CEB263")),
+                ('BACKGROUND', (1,0), (1,0), colors.HexColor("#CEF3C1")),
                 ('TEXTCOLOR', (1,0), (1,0), colors.black),
                 ('ALIGN',(1,1),(-2,-1),'CENTER'),
                 ('ALIGN',(0,0),(-1,0),'CENTER'),
