@@ -928,11 +928,11 @@ elif menu == "FICHE":
 
             table.setStyle(TableStyle([
                 ('GRID', (0,0), (-1,-1), 1, colors.black),
-                ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#1DFB00")),
+                ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#6FCE63")),
                 ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#D7D2C9")),
                 ('TEXTCOLOR', (0,0), (-1,0), colors.black),
                 ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-                ('BACKGROUND', (1,0), (1,0), colors.HexColor("#E6A639")),
+                ('BACKGROUND', (1,0), (1,0), colors.HexColor("#6FCE63")),
                 ('TEXTCOLOR', (1,0), (1,0), colors.black),
                 ('ALIGN',(1,1),(-2,-1),'CENTER'),
                 ('ALIGN',(0,0),(-1,0),'CENTER'),
@@ -1043,7 +1043,7 @@ elif menu == "FICHE":
         affichage=suivi.copy()
         affichage["Nom"] = affichage["Nom"].str.upper()
         st.dataframe(affichage)
-        st.metric("💰 TOTAL À PAYER TATA", f"{total:,.0f} FCFA")
+        st.metric("💰 TOTAL À PAYER TATA", f"{total:,.0f} FCFA".replace(",", " "))
 
         def generate_pdf_paie(df, jour_min, jour_max, mois_lettre, annee, mois_lettre_max, mois_num, mois_max):
             buffer = BytesIO()
@@ -1056,7 +1056,7 @@ elif menu == "FICHE":
                 texte_periode = f"DU {jour_min} {mois_lettre} AU {jour_max} {mois_lettre_max} {annee}"
             else:
                 texte_periode = f"DU {jour_min} AU {jour_max} {mois_lettre} {annee}"
-            logo_path = "afrika_leyri_sas_logo.jpeg"
+            logo_path = "logo_ande.jpeg"
             if os.path.exists(logo_path):
                 logo = Image(logo_path, width=2.5*cm, height=1.5*cm)
             else:
@@ -1087,7 +1087,7 @@ elif menu == "FICHE":
                 colWidths=[16.1*cm]
             )
             titre.setStyle(TableStyle([
-                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#6FCE63")),
+                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#AAFA9F")),
                 ('ALIGN', (0,0), (-1,-1), 'CENTER'),
                 ('BOTTOMPADDING', (0,0), (-1,-1), 6),
                 ('TOPPADDING', (0,0), (-1,-1), 6),
@@ -1105,11 +1105,11 @@ elif menu == "FICHE":
             table = Table(data, colWidths=[6.5*cm, 4*cm, 3*cm, 2.5*cm])
             table.setStyle(TableStyle([
                 ('GRID', (0,0), (-1,-1), 1, colors.black),
-                ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#6FCE63")),
+                ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#567D50")),
                 ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#D7D2C9")),
                 ('TEXTCOLOR', (0,0), (-1,0), colors.black),
                 ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-                ('BACKGROUND', (1,0), (1,0), colors.HexColor("#6FCE63")),
+                ('BACKGROUND', (1,0), (1,0), colors.HexColor("#CEB263")),
                 ('TEXTCOLOR', (1,0), (1,0), colors.black),
                 ('ALIGN',(1,1),(-2,-1),'CENTER'),
                 ('ALIGN',(0,0),(-1,0),'CENTER'),
