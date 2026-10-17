@@ -869,7 +869,7 @@ elif menu == "FICHE":
             logo_path = "logo_ande.jpeg"
 
             if os.path.exists(logo_path):
-                logo = Image(logo_path, width=2.5*cm, height=1.5*cm)
+                logo = Image(logo_path, width=1.0*cm, height=1.0*cm)
             else:
                 logo = Paragraph("", styles["Normal"])
 
@@ -877,7 +877,7 @@ elif menu == "FICHE":
 
             header_table = Table(
                 [[logo, tata_text]],
-                colWidths=[14*cm, 3*cm]
+                colWidths=[13*cm, 4*cm]
             )
 
             header_table.setStyle([
@@ -1064,7 +1064,7 @@ elif menu == "FICHE":
             tata_text = Paragraph(f"<b>TATA</b>", styles["Heading2"])
             header_table = Table(
                 [[logo, tata_text]],
-                colWidths=[13*cm, 3*cm]
+                colWidths=[13*cm, 4*cm]
             )
             header_table.setStyle([
                 ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
