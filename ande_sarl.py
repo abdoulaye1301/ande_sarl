@@ -1104,8 +1104,8 @@ elif menu == "FICHE":
                 ])
             table = Table(data, colWidths=[6.5*cm, 4*cm, 3*cm, 2.5*cm])
             table.setStyle(TableStyle([
-                ('GRID', (0,0), (-1,-1), 1, colors.black),
-                ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#AAFA9F")),
+                ('GRID', (0,0), (-1,-1), 1, colors.HexColor("#8DD883")),
+                ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#8DD883")),
                 ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#D7D2C9")),
                 ('TEXTCOLOR', (0,0), (-1,0), colors.black),
                 ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
