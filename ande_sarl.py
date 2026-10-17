@@ -1109,7 +1109,7 @@ elif menu == "FICHE":
                 ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#D7F3CC")),
                 ('TEXTCOLOR', (0,0), (-1,0), colors.black),
                 ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-                ('BACKGROUND', (1,0), (1,0), colors.HexColor("#CEF3C1")),
+                ('BACKGROUND', (1,0), (1,0), colors.HexColor("#4A9130")),
                 ('TEXTCOLOR', (1,0), (1,0), colors.black),
                 ('ALIGN',(1,1),(-2,-1),'CENTER'),
                 ('ALIGN',(0,0),(-1,0),'CENTER'),
