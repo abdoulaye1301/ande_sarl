@@ -122,7 +122,7 @@ Chargement = Chargement.sort_values( by="Date",ascending=False)
 
 # ========================VERSEMENT DES RZ AVEC DJIBRIL================================#
 
-donnee_RZ_ANDE = pd.read_excel("https://kf.kobotoolbox.org/api/v2/assets/aJj8LNSp65GUsBF4HSYaeq/export-settings/ese2f3uY9UPXefsQidi7fQj/data.xlsx", engine='openpyxl')
+donnee_RZ_ANDE = pd.read_excel("https://kf.kobotoolbox.org/api/v2/assets/aJj8LNSp65GUsBF4HSYaeq/export-settings/esuMq6M4dz43tSTpXb3N7rV/data.xlsx", engine='openpyxl')
 colonne_rz=["today","Date","Opération","Equipe","Agent","Montant","Remise","Mode de versement","_submitted_by"]
 donnee_RZ = donnee_RZ_ANDE[colonne_rz]
 donnee_RZ = donnee_RZ.rename(
@@ -493,23 +493,26 @@ if menu == "AGREGATION":
                     cell = table[total_row_index, j]
                     cell.set_text_props(weight='bold')
                     cell.set_facecolor("#74E9A3")
-                # Chiffre d'affaires réalisé, centré sous le tableau
-                chiffre_affaires_formate = f"{chiffre_affaires:,.0f}".replace(",", " ")
 
-                fig.text(
-                    0.5, 0.055,
-                    f"Chiffre d'affaires réalisé : {chiffre_affaires_formate} FCFA",
-                    ha="center",
-                    va="center",
-                    fontsize=16,
-                    weight="bold",
-                    color="#006400",
-                    bbox=dict(
-                        boxstyle="round,pad=0.4",
-                        facecolor="#E8F5E9",
-                        edgecolor="#74E9A3"
+                
+                # Chiffre d'affaires réalisé, centré sous le tableau
+                if password != OMAR:
+                    chiffre_affaires_formate = f"{chiffre_affaires:,.0f}".replace(",", " ")
+
+                    fig.text(
+                        0.5, 0.055,
+                        f"Chiffre d'affaires réalisé : {chiffre_affaires_formate} FCFA",
+                        ha="center",
+                        va="center",
+                        fontsize=16,
+                        weight="bold",
+                        color="#006400",
+                        bbox=dict(
+                            boxstyle="round,pad=0.4",
+                            facecolor="#E8F5E9",
+                            edgecolor="#74E9A3"
+                        )
                     )
-                )
                 buffer = BytesIO()
                 plt.savefig(buffer, format='png', bbox_inches='tight', dpi=200)
                 plt.close()
