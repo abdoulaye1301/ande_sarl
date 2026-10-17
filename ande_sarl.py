@@ -172,7 +172,7 @@ elif periode == "Mois":
     transport = Team_Leader[(Team_Leader["Mois"] == mois)]
     datea = mois
     donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Mois"] == mois)]
-#-----------------------------------------------------------------#
+#------------------------MENU AGREGATION-----------------------------------------#
 if menu == "AGREGATION":
     sous_menu = st.sidebar.selectbox("", ["Versement","Stock","Stock Départ","Récapitulatif"])
     if sous_menu == "Versement":
@@ -219,8 +219,11 @@ if menu == "AGREGATION":
         ndao=f"{donnee_ordre['Montant'].sum():,.2f}".replace(",", " ")+" XOF"
         st.markdown(f"<h2 style='text-align: center;'> CA : {ndao}</h2><br>", unsafe_allow_html=True)
         st.dataframe(donnee_ordre)
+
     elif sous_menu == "Stock Départ" and periode == "Jour":
         st.warning("Cette option n'est disponible que pour la vue Semaine.")
+
+
     elif sous_menu == "Stock":
         if periode == "Jour":
             donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Numero_semaine"] == semaine) & (Chargement["Date"] == dat)]
@@ -583,20 +586,24 @@ if menu == "AGREGATION":
         if periode == "Semaine":
             donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Semaine"] == semaine)]
             CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()-donnee_RZ_Livr["Remise"].sum()
+            
+            min_dat = Chargement[Chargement["Numero_semaine"] == semaine]["Date"].dropna().unique()[0]
+            #descente_T1 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat) & (Chargement['tata'] == "TATA 1")]
+            #stock_descente_T1 = descente_T1.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
+
+            descente_T2 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat)]
+            stock_descente_T2 = descente_T2.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
+
+            #descente_T3 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat) & (Chargement['tata'] == "TATA 3")]
+            #stock_descente_T3 = descente_T3.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
 
         elif periode == "Mois":
             donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Mois"] == mois)]
             CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()-donnee_RZ_Livr["Remise"].sum()
 
-        min_dat = Chargement[Chargement["Numero_semaine"] == semaine]["Date"].dropna().unique()[0]
-        #descente_T1 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat) & (Chargement['tata'] == "TATA 1")]
-        #stock_descente_T1 = descente_T1.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
+            descente_T2 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Mois'] == mois)]
+            stock_descente_T2 = descente_T2.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
 
-        descente_T2 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat)]
-        stock_descente_T2 = descente_T2.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
-
-        #descente_T3 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat) & (Chargement['tata'] == "TATA 3")]
-        #stock_descente_T3 = descente_T3.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
 
         colonnne= st.columns(2)
         colonnne[0].metric("💴 CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
