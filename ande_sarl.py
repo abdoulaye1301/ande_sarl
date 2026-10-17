@@ -1087,7 +1087,7 @@ elif menu == "FICHE":
                 colWidths=[16.1*cm]
             )
             titre.setStyle(TableStyle([
-                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#AAFA9F")),
+                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#8DD883")),
                 ('ALIGN', (0,0), (-1,-1), 'CENTER'),
                 ('BOTTOMPADDING', (0,0), (-1,-1), 6),
                 ('TOPPADDING', (0,0), (-1,-1), 6),
