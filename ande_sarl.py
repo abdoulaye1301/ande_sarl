@@ -1058,7 +1058,7 @@ elif menu == "FICHE":
                 texte_periode = f"DU {jour_min} AU {jour_max} {mois_lettre} {annee}"
             logo_path = "logo_ande.jpeg"
             if os.path.exists(logo_path):
-                logo = Image(logo_path, width=2.5*cm, height=2.5*cm)
+                logo = Image(logo_path, width=1.0*cm, height=1.0*cm)
             else:
                 logo = Paragraph("", styles["Normal"])
             tata_text = Paragraph(f"<b>TATA</b>", styles["Heading2"])
