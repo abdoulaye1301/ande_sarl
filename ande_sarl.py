@@ -13,7 +13,7 @@ from matplotlib.image import imread
 st.set_page_config(
     page_title="Ingénieur NDAO", layout="wide", page_icon="ndao abdoulaye.png"
 )
-profil = Image.open("Logo Afrika Leyri.png")
+profil = Image.open("logo_ande.jpeg")
 st.logo(profil)
 
 # Upload du fichier Excel
