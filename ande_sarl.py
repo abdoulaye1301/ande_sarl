@@ -601,7 +601,9 @@ if menu == "AGREGATION":
             donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Mois"] == mois)]
             CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()-donnee_RZ_Livr["Remise"].sum()
 
-            descente_T2 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Mois'] == mois)]
+            min_dat = Chargement[Chargement["Mois"] == mois]["Date"].dropna().unique()[0]
+            
+            descente_T2 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Mois'] == mois) & (Chargement['Date'] == min_dat)]
             stock_descente_T2 = descente_T2.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
 
 
