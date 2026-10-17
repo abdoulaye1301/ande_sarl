@@ -1064,7 +1064,7 @@ elif menu == "FICHE":
             tata_text = Paragraph(f"<b>TATA</b>", styles["Heading2"])
             header_table = Table(
                 [[logo, tata_text]],
-                colWidths=[14*cm, 3*cm]
+                colWidths=[13*cm, 3*cm]
             )
             header_table.setStyle([
                 ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
