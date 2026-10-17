@@ -977,7 +977,7 @@ elif menu == "FICHE":
                 colonnne= st.columns(2)
                 colonnne[0].metric("CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
                 colonnne[1].metric("CA TATA", f"{Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
-                colonnne[0].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
+                colonnne[0].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
                 colonnne[1].metric("REMISE", f"{donnee_RZ_Livr["Remise"].sum():,.2f}".replace(",", " ")+" XOF")
 
                 colonnne[0].metric("TRANSPORT TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
