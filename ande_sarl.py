@@ -1169,6 +1169,7 @@ def ande_sarl() :
 
 
 if not st.session_state.authentifie :
+    st.warning("Veuillez vous connecter pour accéder à votre espace.")
     login()
     if st.session_state.authentifie:
         ande_sarl()
