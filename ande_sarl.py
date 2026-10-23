@@ -167,11 +167,13 @@ def login():
             if password == OMAR:
                 st.session_state.authentifie = True
                 st.session_state.utilisateur = OMAR
+                st.success("BIENVENUE SUR L'ESPACE ANDE")
                 st.rerun()
 
             elif password == MANSOUR:
                 st.session_state.authentifie = True
                 st.session_state.utilisateur = MANSOUR
+                st.success("Accès autorisé, vous êtes connectés avec les identifiants de MANSOUR")
                 st.rerun()
 
             elif password == "":
@@ -288,16 +290,6 @@ def ande_sarl() :
             
             st.markdown(f"<h4 style='text-align: center;'>!---------- Stock restant après les ventes du {datea} ----------!</h4><br>", unsafe_allow_html=True)
             
-            if st.session_state.get("utilisateur") == OMAR:
-                st.success("BIENVENUE SUR L'ESPACE ANDE")
-                #if sous_menu=="Stock":
-                #       prom = colone[3].selectbox("", ["TATA 1", "TATA 2", "TATA 3","Tous les TATAS"])
-                #else:
-                    #prom = colone[4].selectbox("", ["TATA 1", "TATA 2", "TATA 3","Tous les TATAS"]) 
-            elif st.session_state.get("utilisateur") == MANSOUR:
-                st.success("Accès autorisé, vous êtes connectés avec les identifiants de MANSOUR")
-            #   prom = "TATA 2"
-        
             if periode == "Jour" :
                 #if prom == "Tous les TATAS":
                 #   stock_lundi = Chargement[(Chargement['Operation'] == 'Stock Lundi') & (Chargement['Numero_semaine'] == semaine)]
