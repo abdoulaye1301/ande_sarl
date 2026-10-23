@@ -294,7 +294,7 @@ def ande_sarl() :
                 #       prom = colone[3].selectbox("", ["TATA 1", "TATA 2", "TATA 3","Tous les TATAS"])
                 #else:
                     #prom = colone[4].selectbox("", ["TATA 1", "TATA 2", "TATA 3","Tous les TATAS"]) 
-            elif if st.session_state.get("utilisateur") == MANSOUR:
+            elif st.session_state.get("utilisateur") == MANSOUR:
                 st.success("Accès autorisé, vous êtes connectés avec les identifiants de MANSOUR")
             #   prom = "TATA 2"
         
