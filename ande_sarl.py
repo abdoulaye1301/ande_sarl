@@ -187,7 +187,7 @@ def ande_sarl() :
     colone= st.columns(5)
     # Choix de l’onglet
     menu = st.sidebar.radio("Navigation", ["AGREGATION","DETAIL","FICHE"])
-    deconnecter = st.form_submit_button("Se déconnecter")
+    deconnecter = st.button("Se déconnecter")
     if deconnecter:
         st.session_state.authentifie = False
     periode = colone[0].selectbox("", ["Jour","Semaine","Mois"])
