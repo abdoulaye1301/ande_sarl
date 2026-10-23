@@ -253,7 +253,7 @@ if menu == "AGREGATION":
         if password in [OMAR, MANSOUR]:
         
             if password == OMAR:
-                st.success("Accès autorisé, vous êtes connectés avec les identifiants de "+("OMAR" if password == OMAR else "DJIBRIL"))
+                st.success("BIENVENUE SUR L'ESPACE ANDE")
                 #if sous_menu=="Stock":
                  #       prom = colone[3].selectbox("", ["TATA 1", "TATA 2", "TATA 3","Tous les TATAS"])
                 #else:
@@ -792,7 +792,11 @@ elif menu == "FICHE":
     from io import BytesIO
     import os
     #Donnees_Mens = pd.read_excel("Donnees_Mensuelle.xlsx", engine='openpyxl')
-    Donnees_Mens = Chargement[Chargement["Operation"] == "Vente"]
+    if periode=="Semaine":
+        Donnees_Mens = Chargement[(Chargement["Operation"] == "Vente") & (Chargement['Numero_semaine'] == semaine)]
+    elif periode=="Mois":
+        Donnees_Mens = Chargement[(Chargement["Operation"] == "Vente") & (Chargement['Mois'] == mois)]
+
     if periode == "Semaine":
         st.sidebar.markdown("---")
         password = st.sidebar.text_input("Code d'accès requis", type="password")
@@ -986,11 +990,11 @@ elif menu == "FICHE":
                 colonnne[1].metric("STATIONNEMENT", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
                 st.markdown("---")
                 st.markdown(f"<h4 style='text-align: center;'>SALAIRES TATAS : {total:,.2f}".replace(",", " ")+" XOF</h4>", unsafe_allow_html=True)
-                Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
-                st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
+                #Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
+                #st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
                 
-                mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - (Depenses + donnee_RZ_Livr["Remise"].sum())
-                st.markdown(f"<h2 style='text-align: center;'>MONTANT À VERSER PAR OMAR : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
+                mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - donnee_RZ_Livr["Remise"].sum()
+                st.markdown(f"<h2 style='text-align: center;'>MONTANT À VERSER : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
     elif periode == "Mois":
         st.sidebar.markdown("---")
         password = st.sidebar.text_input("Code d'accès requis", type="password")
@@ -1164,4 +1168,4 @@ elif menu == "FICHE":
                 st.markdown(f"<h2 style='text-align: center;'>MONTANT À VERSER PAR OMAR : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
 
     else:
-        st.warning("Disponible uniquement en mode Semaine")
+        st.warning("Disponible uniquement en mode Semaine et mois")
