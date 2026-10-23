@@ -143,140 +143,165 @@ donnee_RZ["Superviseur"] = donnee_RZ["Superviseur"].apply(lambda x: "DJIBRIL DIO
 donnee_RZ["Semaine"] = donnee_RZ["Date"].apply(lambda x: pd.Timestamp(x).isocalendar().week)
 #st.write(donnee_RZ)
 
-# Définir les bornes du slider
-num_semaine = Chargement["Numero_semaine"].unique()
-colone= st.columns(5)
-# Choix de l’onglet
-menu = st.sidebar.radio("Navigation", ["AGREGATION","DETAIL","FICHE"])
-periode = colone[0].selectbox("", ["Jour","Semaine","Mois"])
-if periode == "Jour":
-    semaine = colone[2].selectbox("", num_semaine)
-    min_date = Chargement[Chargement["Numero_semaine"] == semaine]["Date"].dropna().unique()
-    dat = colone[4].selectbox("", min_date)
-    datea = dat.strftime("%d-%m-%Y")
-    statio = Chargement[(Chargement["Date"] == dat)]
-    stationnement = Team_Leader[(Team_Leader["Date"] == dat)]
-    transport = Team_Leader[(Team_Leader["Date"] == dat)]
-    donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Date"] == dat)]
-elif periode == "Semaine":
-    semaine = colone[2].selectbox("", num_semaine)
-    statio = Chargement[(Chargement["Numero_semaine"] == semaine)]
-    stationnement = Team_Leader[(Team_Leader["Numero_semaine"] == semaine)]
-    transport = Team_Leader[(Team_Leader["Numero_semaine"] == semaine)]
-    datea = semaine
-    donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Numero_semaine"] == semaine)]
-elif periode == "Mois":
-    mois = colone[2].selectbox("", Chargement["Mois"].unique())
-    statio = Chargement[(Chargement["Mois"] == mois)]
-    stationnement = Team_Leader[(Team_Leader["Mois"] == mois)]
-    transport = Team_Leader[(Team_Leader["Mois"] == mois)]
-    datea = mois
-    donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Mois"] == mois)]
-#------------------------MENU AGREGATION-----------------------------------------#
-if menu == "AGREGATION":
-    sous_menu = st.sidebar.selectbox("", ["Versement","Stock","Stock Départ","Récapitulatif"])
-    if sous_menu == "Versement":
-        donnee_agre = (
-            donne_vente.groupby(["tata"])
-            .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
-            .reset_index()
-        )
-        
-        st.markdown(f"<h4 style='text-align: center;'>!---------- Versement des promoteurs du {datea} ----------!</h4><br>", unsafe_allow_html=True)
-        donnee_agre = donnee_agre.rename(
-            columns={
-                "Quantites_Cartons": "Quantités",
-                "Montant": "Montant A verser",
-            }
-        )
-        donnee_ordre = donnee_agre.sort_values(by=["tata"], ascending=False)
-
-        colone= st.columns(3)
-        #colone[0].metric("💴 CA TATA 1", f"{donnee_ordre[donnee_ordre['tata'] =='TATA 1']['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
-        colone[0].metric("💴 Chiffre d'affaires", f"{donnee_ordre['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
-        colone[1].metric("🚐 Transport", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
-        colone[2].metric("🅿️ Stationnement", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
-        
-
-    elif sous_menu == "Stock Départ" and periode == "Semaine":
-        st.markdown(f"<h4 style='text-align: center;'>!---------- Stock de départ du {datea} ----------!</h4><br>", unsafe_allow_html=True)
-        
-        #prom = colone[4].selectbox("", ["TATA 3"])
-        
-        statio1= statio[(statio["Operation"] == "Stock Lundi")]
-        donnee_agre = (
-            statio1.groupby(["tata", "Produit"])
-            .agg({"Quantites_Cartons": "sum",
-                  "Montant": "sum"})
-            .reset_index()
-        )
-        donnee_agre = donnee_agre.rename(
-            columns={
-                "Quantites_Cartons": "Quantités",
-            }
-        )
-        donnee_ordre = donnee_agre.sort_values(by=["tata"], ascending=False)
-        ndao=f"{donnee_ordre['Montant'].sum():,.2f}".replace(",", " ")+" XOF"
-        st.markdown(f"<h2 style='text-align: center;'> CA : {ndao}</h2><br>", unsafe_allow_html=True)
-        st.dataframe(donnee_ordre)
-
-    elif sous_menu == "Stock Départ" and periode == "Jour":
-        st.warning("Cette option n'est disponible que pour la vue Semaine.")
+#=============Page de connexion ===================#
+#st.sidebar.markdown("---")
+#password = st.sidebar.text_input("Veuillez entrer le code d'accès", type="password")
+OMAR = st.secrets["credentials"]["omar"]
+MANSOUR = st.secrets["credentials"]["mansour"]
+#OMAR=""
+#MANSOUR=""
+password=""
+# =======================CONNEXION=====================================#
+def login():
+    #st.sidebar.title("🔐 Connexion")
+    with st.sidebar.form("login_form"):
+        #user = st.text_input("Nom d'utilisateur")
+        password = st.text_input("Mot de passe", type="password")
+        submit = st.form_submit_button("Connexion")
+        if submit:
+            if  password in [OMAR,MANSOUR]:
+                st.session_state.authentifie = True
+                st.success("✅ Connexion réussie !")
+            elif password == "":
+                st.warning("Veuillez vous connecter pour accéder à votre espace.")
+                st.stop()
+            else:
+                st.error("❌ Identifiant incorrect. Veuillez réessayer.")
+                st.stop()
 
 
-    elif sous_menu == "Stock":
-        if periode == "Jour":
-            donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Numero_semaine"] == semaine) & (Chargement["Date"] == dat)]
-        elif periode == "Semaine":
-            donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Numero_semaine"] == semaine)]
-        donnee_agre = (
-            donne_vente.groupby(["tata"])
-            .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
-            .reset_index()
-        )
-        donnee_agre = donnee_agre.rename(
-            columns={
-                "Quantites_Cartons": "Quantités",
-                "Montant": "Montant A verser",
-            }
-        )
-        donnee_ordre = donnee_agre.sort_values(by=["tata"], ascending=False)
+if not st.session_state.authentifie:
+    st.warning("Veuillez vous connecter pour accéder aux données.")
+    login()
+else :
+    # Définir les bornes du slider
+    num_semaine = Chargement["Numero_semaine"].unique()
+    colone= st.columns(5)
+    # Choix de l’onglet
+    menu = st.sidebar.radio("Navigation", ["AGREGATION","DETAIL","FICHE"])
+    periode = colone[0].selectbox("", ["Jour","Semaine","Mois"])
+    if periode == "Jour":
+        semaine = colone[2].selectbox("", num_semaine)
+        min_date = Chargement[Chargement["Numero_semaine"] == semaine]["Date"].dropna().unique()
+        dat = colone[4].selectbox("", min_date)
+        datea = dat.strftime("%d-%m-%Y")
+        statio = Chargement[(Chargement["Date"] == dat)]
+        stationnement = Team_Leader[(Team_Leader["Date"] == dat)]
+        transport = Team_Leader[(Team_Leader["Date"] == dat)]
+        donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Date"] == dat)]
+    elif periode == "Semaine":
+        semaine = colone[2].selectbox("", num_semaine)
+        statio = Chargement[(Chargement["Numero_semaine"] == semaine)]
+        stationnement = Team_Leader[(Team_Leader["Numero_semaine"] == semaine)]
+        transport = Team_Leader[(Team_Leader["Numero_semaine"] == semaine)]
+        datea = semaine
+        donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Numero_semaine"] == semaine)]
+    elif periode == "Mois":
+        mois = colone[2].selectbox("", Chargement["Mois"].unique())
+        statio = Chargement[(Chargement["Mois"] == mois)]
+        stationnement = Team_Leader[(Team_Leader["Mois"] == mois)]
+        transport = Team_Leader[(Team_Leader["Mois"] == mois)]
+        datea = mois
+        donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Mois"] == mois)]
+    #------------------------MENU AGREGATION-----------------------------------------#
+    if menu == "AGREGATION":
+        sous_menu = st.sidebar.selectbox("", ["Versement","Stock","Stock Départ","Récapitulatif"])
+        if sous_menu == "Versement":
+            donnee_agre = (
+                donne_vente.groupby(["tata"])
+                .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
+                .reset_index()
+            )
+            
+            st.markdown(f"<h4 style='text-align: center;'>!---------- Versement des promoteurs du {datea} ----------!</h4><br>", unsafe_allow_html=True)
+            donnee_agre = donnee_agre.rename(
+                columns={
+                    "Quantites_Cartons": "Quantités",
+                    "Montant": "Montant A verser",
+                }
+            )
+            donnee_ordre = donnee_agre.sort_values(by=["tata"], ascending=False)
 
-#-----------------------------------------------------------------#
-        st.sidebar.markdown("---")
-        password = st.sidebar.text_input("Veuillez entrer le code d'accès", type="password")
-        OMAR = st.secrets["credentials"]["omar"]
-        MANSOUR = st.secrets["credentials"]["mansour"]
-        #OMAR=""
-        #MANSOUR=""
-        st.markdown(f"<h4 style='text-align: center;'>!---------- Stock restant après les ventes du {datea} ----------!</h4><br>", unsafe_allow_html=True)
-        if password in [OMAR, MANSOUR]:
-        
+            colone= st.columns(3)
+            #colone[0].metric("💴 CA TATA 1", f"{donnee_ordre[donnee_ordre['tata'] =='TATA 1']['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
+            colone[0].metric("💴 Chiffre d'affaires", f"{donnee_ordre['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
+            colone[1].metric("🚐 Transport", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
+            colone[2].metric("🅿️ Stationnement", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
+            
+
+        elif sous_menu == "Stock Départ" and periode == "Semaine":
+            st.markdown(f"<h4 style='text-align: center;'>!---------- Stock de départ du {datea} ----------!</h4><br>", unsafe_allow_html=True)
+            
+            #prom = colone[4].selectbox("", ["TATA 3"])
+            
+            statio1= statio[(statio["Operation"] == "Stock Lundi")]
+            donnee_agre = (
+                statio1.groupby(["tata", "Produit"])
+                .agg({"Quantites_Cartons": "sum",
+                    "Montant": "sum"})
+                .reset_index()
+            )
+            donnee_agre = donnee_agre.rename(
+                columns={
+                    "Quantites_Cartons": "Quantités",
+                }
+            )
+            donnee_ordre = donnee_agre.sort_values(by=["tata"], ascending=False)
+            ndao=f"{donnee_ordre['Montant'].sum():,.2f}".replace(",", " ")+" XOF"
+            st.markdown(f"<h2 style='text-align: center;'> CA : {ndao}</h2><br>", unsafe_allow_html=True)
+            st.dataframe(donnee_ordre)
+
+        elif sous_menu == "Stock Départ" and periode == "Jour":
+            st.warning("Cette option n'est disponible que pour la vue Semaine.")
+
+
+        elif sous_menu == "Stock":
+            if periode == "Jour":
+                donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Numero_semaine"] == semaine) & (Chargement["Date"] == dat)]
+            elif periode == "Semaine":
+                donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Numero_semaine"] == semaine)]
+            donnee_agre = (
+                donne_vente.groupby(["tata"])
+                .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
+                .reset_index()
+            )
+            donnee_agre = donnee_agre.rename(
+                columns={
+                    "Quantites_Cartons": "Quantités",
+                    "Montant": "Montant A verser",
+                }
+            )
+            donnee_ordre = donnee_agre.sort_values(by=["tata"], ascending=False)
+
+    #-----------------------------------------------------------------#
+            
+            st.markdown(f"<h4 style='text-align: center;'>!---------- Stock restant après les ventes du {datea} ----------!</h4><br>", unsafe_allow_html=True)
+            
             if password == OMAR:
                 st.success("BIENVENUE SUR L'ESPACE ANDE")
                 #if sous_menu=="Stock":
-                 #       prom = colone[3].selectbox("", ["TATA 1", "TATA 2", "TATA 3","Tous les TATAS"])
+                #       prom = colone[3].selectbox("", ["TATA 1", "TATA 2", "TATA 3","Tous les TATAS"])
                 #else:
                     #prom = colone[4].selectbox("", ["TATA 1", "TATA 2", "TATA 3","Tous les TATAS"]) 
             elif password == MANSOUR:
                 st.success("Accès autorisé, vous êtes connectés avec les identifiants de MANSOUR")
-             #   prom = "TATA 2"
+            #   prom = "TATA 2"
         
             if periode == "Jour" :
                 #if prom == "Tous les TATAS":
-                 #   stock_lundi = Chargement[(Chargement['Operation'] == 'Stock Lundi') & (Chargement['Numero_semaine'] == semaine)]
-                  #  ventes = Chargement[(Chargement['Operation'] == 'Vente') & (Chargement['Numero_semaine'] == semaine) & (Chargement["Date"] <= dat)]
-                   # descente = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == dat)]
+                #   stock_lundi = Chargement[(Chargement['Operation'] == 'Stock Lundi') & (Chargement['Numero_semaine'] == semaine)]
+                #  ventes = Chargement[(Chargement['Operation'] == 'Vente') & (Chargement['Numero_semaine'] == semaine) & (Chargement["Date"] <= dat)]
+                # descente = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == dat)]
                 #else:
                     stock_lundi = Chargement[(Chargement['Operation'] == 'Stock Lundi') & (Chargement['Numero_semaine'] == semaine)]
                     ventes = Chargement[(Chargement['Operation'] == 'Vente') & (Chargement['Numero_semaine'] == semaine) & (Chargement["Date"] <= dat)]
                     descente = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == dat)]
-           
+        
             elif periode == "Semaine":
                 #if prom == "Tous les TATAS":
-                 #   stock_lundi = Chargement[(Chargement['Operation'] == 'Stock Lundi') & (Chargement['Numero_semaine'] == semaine)]
-                  #  ventes = Chargement[(Chargement['Operation'] == 'Vente') & (Chargement['Numero_semaine'] == semaine)]
-                   # min_dat = Chargement[Chargement["Numero_semaine"] == semaine]["Date"].dropna().unique()[0]
+                #   stock_lundi = Chargement[(Chargement['Operation'] == 'Stock Lundi') & (Chargement['Numero_semaine'] == semaine)]
+                #  ventes = Chargement[(Chargement['Operation'] == 'Vente') & (Chargement['Numero_semaine'] == semaine)]
+                # min_dat = Chargement[Chargement["Numero_semaine"] == semaine]["Date"].dropna().unique()[0]
                     #descente = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat)]
                 #else:
                     stock_lundi = Chargement[(Chargement['Operation'] == 'Stock Lundi') & (Chargement['Numero_semaine'] == semaine)]
@@ -285,9 +310,9 @@ if menu == "AGREGATION":
                     descente = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat)]
             elif periode == "Mois":
                 #if prom == "Tous les TATAS":
-                 #   stock_lundi = Chargement[(Chargement['Operation'] == 'Stock Lundi') & (Chargement['Mois'] == mois)]
-                  #  ventes = Chargement[(Chargement['Operation'] == 'Vente') & (Chargement['Mois'] == mois)]
-                   # min_dat = Chargement[Chargement["Mois"] == mois]["Date"].dropna().unique()[0]
+                #   stock_lundi = Chargement[(Chargement['Operation'] == 'Stock Lundi') & (Chargement['Mois'] == mois)]
+                #  ventes = Chargement[(Chargement['Operation'] == 'Vente') & (Chargement['Mois'] == mois)]
+                # min_dat = Chargement[Chargement["Mois"] == mois]["Date"].dropna().unique()[0]
                     #descente = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Mois'] == mois) & (Chargement['Date'] == min_dat)]
                 #else:
                     stock_lundi = Chargement[(Chargement['Operation'] == 'Stock Lundi') & (Chargement['Mois'] == mois)]
@@ -296,15 +321,15 @@ if menu == "AGREGATION":
                     descente = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Mois'] == mois) & (Chargement['Date'] == min_dat)]
             # Regrouper par tata et produit
             #if prom == "Tous les TATAS":
-             #   stock_init = stock_lundi.groupby(['Produit'])['Quantites_Cartons'].sum()
-              #  ventes_total = ventes.groupby(['Produit'])['Quantites_Cartons'].sum()
-               # stock_descente = descente.groupby(['Produit'])['Quantites_Cartons'].sum()
+            #   stock_init = stock_lundi.groupby(['Produit'])['Quantites_Cartons'].sum()
+            #  ventes_total = ventes.groupby(['Produit'])['Quantites_Cartons'].sum()
+            # stock_descente = descente.groupby(['Produit'])['Quantites_Cartons'].sum()
                 
                 #stock_Theorique = stock_init.subtract(ventes_total, fill_value=0)
 
                 #df_final = stock_Theorique.reset_index().rename(columns={'Quantites_Cartons': 'Stock Théorique'})
                 #df_final['Stock Restant'] = df_final.apply(
-                 #   lambda row: stock_descente.get((row['Produit']), 0), axis=1
+                #   lambda row: stock_descente.get((row['Produit']), 0), axis=1
                 #)
             #else:
             stock_init = stock_lundi.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
@@ -327,9 +352,9 @@ if menu == "AGREGATION":
             )
             
             #if prom == "Tous les TATAS":
-             #   st.dataframe(df_final)
-              #  donn = df_final[["Produit", "Stock Restant"]].copy()
-               # donn["TATA"] = "Tous les TATAS"
+            #   st.dataframe(df_final)
+            #  donn = df_final[["Produit", "Stock Restant"]].copy()
+            # donn["TATA"] = "Tous les TATAS"
             #else:
             df_final1 = df_final.drop("tata", axis=1).copy()
             st.dataframe(df_final1)
@@ -339,9 +364,9 @@ if menu == "AGREGATION":
         #-----------------------------------------------------------------#
         #---------------------------- Rapport de Omar et Tous les TATAS ---#
             #if prom == "Tous les TATAS":
-             #   donnee_agr_total = donne_vente.groupby(["Produit"]).agg({"Quantites_Cartons": "sum"}).reset_index()
-              #  donnee_agr_total["TATA"] = "Tous les TATAS"
-               # donnee_ordr = donnee_agr_total
+            #   donnee_agr_total = donne_vente.groupby(["Produit"]).agg({"Quantites_Cartons": "sum"}).reset_index()
+            #  donnee_agr_total["TATA"] = "Tous les TATAS"
+            # donnee_ordr = donnee_agr_total
             #else:
             #===block else ========
             donnee_agr = (
@@ -363,11 +388,11 @@ if menu == "AGREGATION":
             st.markdown(f"<br><h4 style='text-align: center;'>!---------- Rapport des ventes du {datea} ----------!</h4>", unsafe_allow_html=True)
             
             #if prom == "Tous les TATAS":
-             #   donne_vente_sum = donne_vente.groupby(["Produit"])["Quantites_Cartons"].sum().reset_index()
-              #  donne_vente_sum = donne_vente_sum.rename(columns={"Quantites_Cartons": "Quantités vendues"})
-               # donnee_ordr = pd.merge(donn, donne_vente_sum, on=["Produit"], how="left")
+            #   donne_vente_sum = donne_vente.groupby(["Produit"])["Quantites_Cartons"].sum().reset_index()
+            #  donne_vente_sum = donne_vente_sum.rename(columns={"Quantites_Cartons": "Quantités vendues"})
+            # donnee_ordr = pd.merge(donn, donne_vente_sum, on=["Produit"], how="left")
                 #if "TATA" in donnee_ordr.columns:
-                 #   donnee_ordr = donnee_ordr.drop("TATA", axis=1)
+                #   donnee_ordr = donnee_ordr.drop("TATA", axis=1)
             #else:
             donnee_ordr = pd.merge(donn, donnee_ordr, on=["TATA", "Produit"], how="left")
 
@@ -387,7 +412,7 @@ if menu == "AGREGATION":
                 "Quantités vendues": quantite_total
             }
             #if prom != "Tous les TATAS":
-             #   total_row["TATA"] = ""
+            #   total_row["TATA"] = ""
 
             df_final_total = pd.concat([filtre, pd.DataFrame([total_row])], ignore_index=True)
             df_final_total["Stock Restant"] = df_final_total["Stock Restant"].round(2)
@@ -524,9 +549,9 @@ if menu == "AGREGATION":
 
             if periode == "Jour":
                 #if prom == "Tous les TATAS":
-                 #   zone_str = "Toutes les zones"
-                  #  nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
-                   # commente = ["Rapport global Tous les TATAS"]
+                #   zone_str = "Toutes les zones"
+                #  nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
+                # commente = ["Rapport global Tous les TATAS"]
                 #else:
                     zone_vals = Chargement[ (Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat)]["zone"].dropna().unique()
                     zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
@@ -537,9 +562,9 @@ if menu == "AGREGATION":
                     ca_realise = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Operation'] == "Vente")]["Montant"].sum()
             elif periode == "Semaine":
                 #if prom == "Tous les TATAS":
-                 #   zone_str = "Toutes les zones"
-                  #  nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
-                   # commente = ["Rapport global Tous les TATAS"]
+                #   zone_str = "Toutes les zones"
+                #  nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
+                # commente = ["Rapport global Tous les TATAS"]
                 #else:
                     zone_vals = Chargement[(Chargement["Numero_semaine"] == semaine)]["zone"].dropna().unique()
                     zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
@@ -548,9 +573,9 @@ if menu == "AGREGATION":
                     ca_realise = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Operation'] == "Vente")]["Montant"].sum()
             elif periode == "Mois":
                 #if prom == "Tous les TATAS":
-                 #   zone_str = "Toutes les zones"
-                  #  nb_promoteurs = len(Chargement[(Chargement["Mois"] == mois) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
-                   # commente = ["Rapport global Tous les TATAS"]
+                #   zone_str = "Toutes les zones"
+                #  nb_promoteurs = len(Chargement[(Chargement["Mois"] == mois) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
+                # commente = ["Rapport global Tous les TATAS"]
                 #else:
                     zone_vals = Chargement[(Chargement["Mois"] == mois)]["zone"].dropna().unique()
                     zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
@@ -568,103 +593,162 @@ if menu == "AGREGATION":
                 file_name=f"rapport_TATA_du_{datea}.png",
                 mime="image/png"
             )
-        else:
-            st.error("Accès refusé, code d'accès incorrect.")
-
-    elif sous_menu == "Récapitulatif" and periode in ["Semaine", "Mois"]:
-        st.markdown(f"<h4 style='text-align: center;'>!---------- Récapitulatif des ventes TATA et RZ du {periode.lower()} {datea} ----------!</h4><br>", unsafe_allow_html=True)
-        donnee_agre = (
-            donne_vente.groupby(["tata"])
-            .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
-            .reset_index()
-        )
-        donnee_agre = donnee_agre.rename(
-            columns={
-                "Quantites_Cartons": "Quantités",
-                "Montant": "Montant A verser",
-            }
-        )
-        donnee_ordre = donnee_agre.sort_values(by=["tata"], ascending=False)
-        if periode == "Semaine":
-            donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Semaine"] == semaine)]
-            CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()-donnee_RZ_Livr["Remise"].sum()
-            
-            min_dat = Chargement[Chargement["Numero_semaine"] == semaine]["Date"].dropna().unique()[0]
-            #descente_T1 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat) & (Chargement['tata'] == "TATA 1")]
-            #stock_descente_T1 = descente_T1.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
-
-            descente_T2 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat)]
-            stock_descente_T2 = descente_T2.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
-
-            #descente_T3 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat) & (Chargement['tata'] == "TATA 3")]
-            #stock_descente_T3 = descente_T3.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
-
-        elif periode == "Mois":
-            donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Mois"] == mois)]
-            CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()-donnee_RZ_Livr["Remise"].sum()
-
-            min_dat = Chargement[Chargement["Mois"] == mois]["Date"].dropna().unique()[0]
-            
-            descente_T2 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Mois'] == mois) & (Chargement['Date'] == min_dat)]
-            stock_descente_T2 = descente_T2.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
-
-
-        colonnne= st.columns(2)
-        colonnne[0].metric("💴 CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
-        colonnne[1].metric("💴 CA RZ + TATA", f"{CA_donnee_RZ+donnee_ordre['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
-        colonnne[0].metric("💴 CA TATA", f"{donnee_ordre['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
-        colonnne[1].metric("🔢 Quantité vendue", f"{donnee_ordre['Quantités'].sum():,.2f}".replace(",", " "))
         
-        ca_restant=descente_T2["Montant"].sum()
-        rest=stock_descente_T2.sum()
+        elif sous_menu == "Récapitulatif" and periode in ["Semaine", "Mois"]:
+            st.markdown(f"<h4 style='text-align: center;'>!---------- Récapitulatif des ventes TATA et RZ du {periode.lower()} {datea} ----------!</h4><br>", unsafe_allow_html=True)
+            donnee_agre = (
+                donne_vente.groupby(["tata"])
+                .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
+                .reset_index()
+            )
+            donnee_agre = donnee_agre.rename(
+                columns={
+                    "Quantites_Cartons": "Quantités",
+                    "Montant": "Montant A verser",
+                }
+            )
+            donnee_ordre = donnee_agre.sort_values(by=["tata"], ascending=False)
+            if periode == "Semaine":
+                donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Semaine"] == semaine)]
+                CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()-donnee_RZ_Livr["Remise"].sum()
+                
+                min_dat = Chargement[Chargement["Numero_semaine"] == semaine]["Date"].dropna().unique()[0]
+                #descente_T1 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat) & (Chargement['tata'] == "TATA 1")]
+                #stock_descente_T1 = descente_T1.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
 
-        colonnne[0].metric("🚐 Transport TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
-        colonnne[1].metric("🅿️ Stationnement", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
-        colonnne[0].metric("🏠 **Stock Restant (CA)**", f"{ca_restant:,.2f}".replace(",", " ")+" XOF")
-        colonnne[1].metric("🏠 **Quantité Restante (STOCK)**", f"{rest:,.2f}".replace(",", " "))
-    
-    elif sous_menu == "Récapitulatif" and periode == "Jour":
-        st.warning("Cette option n'est disponible que pour la vue Semaine.")
-    
-#-----------------------------------------------------------------#
-elif menu == "DETAIL":
-    donnee = donne_vente
-    #menu_sambou = st.sidebar.selectbox("TATAS", ["TATA 1","TATA 2", "TATA 3"])
-    #donnee1 = donnee[(donnee["tata"] == menu_sambou)]
-    donnee1 = donnee.copy()
-    nom_promo=donnee1["Prenom_Nom_Promoteur"].dropna().unique().tolist()
-    produit_list=donnee1[donnee1["Operation"] == "Vente"]["Produit"].dropna().unique().tolist()
-    tat_indi= st.sidebar.selectbox("Option", ["TATA","INDIVIDUEL"])
-    if tat_indi == "INDIVIDUEL":
-        choix= st.sidebar.selectbox("Votre choix", ["Promoteur","Produit"])
-        if choix == "Promoteur":
-            if periode == "Jour":
-                promoteur = st.sidebar.selectbox("Promoteurs", nom_promo)
-                donnee2 = donnee1[(donnee["Prenom_Nom_Promoteur"] == promoteur)]
-                donne_vente = donnee2[donnee2["Operation"] == "Vente"]
-                if promoteur=="Autre":
+                descente_T2 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat)]
+                stock_descente_T2 = descente_T2.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
+
+                #descente_T3 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Numero_semaine'] == semaine) & (Chargement['Date'] == min_dat) & (Chargement['tata'] == "TATA 3")]
+                #stock_descente_T3 = descente_T3.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
+
+            elif periode == "Mois":
+                donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Mois"] == mois)]
+                CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()-donnee_RZ_Livr["Remise"].sum()
+
+                min_dat = Chargement[Chargement["Mois"] == mois]["Date"].dropna().unique()[0]
+                
+                descente_T2 = Chargement[(Chargement['Operation'] == 'Stock Descente') & (Chargement['Mois'] == mois) & (Chargement['Date'] == min_dat)]
+                stock_descente_T2 = descente_T2.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
+
+
+            colonnne= st.columns(2)
+            colonnne[0].metric("💴 CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
+            colonnne[1].metric("💴 CA RZ + TATA", f"{CA_donnee_RZ+donnee_ordre['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
+            colonnne[0].metric("💴 CA TATA", f"{donnee_ordre['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
+            colonnne[1].metric("🔢 Quantité vendue", f"{donnee_ordre['Quantités'].sum():,.2f}".replace(",", " "))
+            
+            ca_restant=descente_T2["Montant"].sum()
+            rest=stock_descente_T2.sum()
+
+            colonnne[0].metric("🚐 Transport TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
+            colonnne[1].metric("🅿️ Stationnement", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
+            colonnne[0].metric("🏠 **Stock Restant (CA)**", f"{ca_restant:,.2f}".replace(",", " ")+" XOF")
+            colonnne[1].metric("🏠 **Quantité Restante (STOCK)**", f"{rest:,.2f}".replace(",", " "))
+        
+        elif sous_menu == "Récapitulatif" and periode == "Jour":
+            st.warning("Cette option n'est disponible que pour la vue Semaine et mois.")
+        
+    #-----------------------------------------------------------------#
+    elif menu == "DETAIL":
+        donnee = donne_vente
+        #menu_sambou = st.sidebar.selectbox("TATAS", ["TATA 1","TATA 2", "TATA 3"])
+        #donnee1 = donnee[(donnee["tata"] == menu_sambou)]
+        donnee1 = donnee.copy()
+        nom_promo=donnee1["Prenom_Nom_Promoteur"].dropna().unique().tolist()
+        produit_list=donnee1[donnee1["Operation"] == "Vente"]["Produit"].dropna().unique().tolist()
+        tat_indi= st.sidebar.selectbox("Option", ["TATA","INDIVIDUEL"])
+        if tat_indi == "INDIVIDUEL":
+            choix= st.sidebar.selectbox("Votre choix", ["Promoteur","Produit"])
+            if choix == "Promoteur":
+                if periode == "Jour":
+                    promoteur = st.sidebar.selectbox("Promoteurs", nom_promo)
+                    donnee2 = donnee1[(donnee["Prenom_Nom_Promoteur"] == promoteur)]
+                    donne_vente = donnee2[donnee2["Operation"] == "Vente"]
+                    if promoteur=="Autre":
+                        donnee_agre = (
+                            donne_vente.groupby(["tata","zone","Precisez","Produit"])
+                            .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
+                            .reset_index()
+                        )
+                        st.subheader("Ventes des promoteurs")
+                        donnee_agre = donnee_agre.rename(
+                            columns={
+                                "tata": "TATA",
+                                "Precisez": "RZ",
+                                "Quantites_Cartons": "Quantités",
+                                "Montant": "Montant A verser",
+                            }
+                        )
+                        donnee_ordre = donnee_agre.sort_values(by=["TATA","RZ"], ascending=False)
+                    else:
+                        donnee_agre = (
+                            donne_vente.groupby(["tata","zone","Prenom_Nom_Promoteur","Produit"])
+                            .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
+                            .reset_index()
+                        )
+                        st.subheader("Ventes des promoteurs")
+                        donnee_agre = donnee_agre.rename(
+                            columns={
+                                "tata": "TATA",
+                                "Prenom_Nom_Promoteur": "Promoteur",
+                                "Quantites_Cartons": "Quantités",
+                                "Montant": "Montant A verser",
+                            }
+                        )
+                        donnee_ordre = donnee_agre.sort_values(by=["TATA","Promoteur"], ascending=False)
+                elif periode == "Semaine":
+                    donne_vente = donnee1[donnee1["Operation"] == "Vente"]
                     donnee_agre = (
-                        donne_vente.groupby(["tata","zone","Precisez","Produit"])
-                        .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
+                        donne_vente.groupby(["tata","Prenom_Nom_Promoteur"])
+                        .agg({"Montant": "sum"})
                         .reset_index()
                     )
-                    st.subheader("Ventes des promoteurs")
+                    st.subheader("Ventes de promoteurs")
                     donnee_agre = donnee_agre.rename(
                         columns={
                             "tata": "TATA",
-                            "Precisez": "RZ",
-                            "Quantites_Cartons": "Quantités",
-                            "Montant": "Montant A verser",
+                            "Prenom_Nom_Promoteur": "Promoteur",
+                            "Montant": "CA SEMAINE",
                         }
                     )
-                    donnee_ordre = donnee_agre.sort_values(by=["TATA","RZ"], ascending=False)
-                else:
+                    donnee_ordre = donnee_agre.sort_values(by=["Promoteur"], ascending=False)
+                elif periode == "Mois":
+                    donne_vente = donnee1[donnee1["Operation"] == "Vente"]
                     donnee_agre = (
-                        donne_vente.groupby(["tata","zone","Prenom_Nom_Promoteur","Produit"])
-                        .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
+                        donne_vente.groupby(["tata","Prenom_Nom_Promoteur"])
+                        .agg({"Montant": "sum"})
                         .reset_index()
                     )
-                    st.subheader("Ventes des promoteurs")
+                    st.subheader("Ventes de promoteurs")
+                    donnee_agre = donnee_agre.rename(
+                        columns={
+                            "tata": "TATA",
+                            "Prenom_Nom_Promoteur": "Promoteur",
+                            "Montant": "CA MOIS",
+                        }
+                    )
+                    donnee_ordre = donnee_agre.sort_values(by=["Promoteur"], ascending=False)
+            elif choix == "Produit":
+                menu_prin=st.sidebar.selectbox("PRODUITS", produit_list)
+                donnee2 = donnee1[(donnee["Produit"] == menu_prin)]
+                donne_vente = donnee2[donnee2["Operation"] == "Vente"]
+                donnee_agre = (
+                    donne_vente.groupby(["tata","zone","Prenom_Nom_Promoteur","Produit"])
+                    .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
+                    .reset_index()
+                )
+                st.subheader("Ventes de promoteurs")
+                if periode == "Semaine":
+                    donnee_agre = donnee_agre.rename(
+                        columns={
+                            "tata": "TATA",
+                            "Prenom_Nom_Promoteur": "Promoteur",
+                            "Quantites_Cartons": "Quantités",
+                            "Montant": "CA SEMAINE",
+                        }
+                    )
+                elif periode == "Jour":
                     donnee_agre = donnee_agre.rename(
                         columns={
                             "tata": "TATA",
@@ -673,45 +757,14 @@ elif menu == "DETAIL":
                             "Montant": "Montant A verser",
                         }
                     )
-                    donnee_ordre = donnee_agre.sort_values(by=["TATA","Promoteur"], ascending=False)
-            elif periode == "Semaine":
-                donne_vente = donnee1[donnee1["Operation"] == "Vente"]
-                donnee_agre = (
-                    donne_vente.groupby(["tata","Prenom_Nom_Promoteur"])
-                    .agg({"Montant": "sum"})
-                    .reset_index()
-                )
-                st.subheader("Ventes de promoteurs")
-                donnee_agre = donnee_agre.rename(
-                    columns={
-                        "tata": "TATA",
-                        "Prenom_Nom_Promoteur": "Promoteur",
-                        "Montant": "CA SEMAINE",
-                    }
-                )
-                donnee_ordre = donnee_agre.sort_values(by=["Promoteur"], ascending=False)
-            elif periode == "Mois":
-                donne_vente = donnee1[donnee1["Operation"] == "Vente"]
-                donnee_agre = (
-                    donne_vente.groupby(["tata","Prenom_Nom_Promoteur"])
-                    .agg({"Montant": "sum"})
-                    .reset_index()
-                )
-                st.subheader("Ventes de promoteurs")
-                donnee_agre = donnee_agre.rename(
-                    columns={
-                        "tata": "TATA",
-                        "Prenom_Nom_Promoteur": "Promoteur",
-                        "Montant": "CA MOIS",
-                    }
-                )
-                donnee_ordre = donnee_agre.sort_values(by=["Promoteur"], ascending=False)
-        elif choix == "Produit":
-            menu_prin=st.sidebar.selectbox("PRODUITS", produit_list)
-            donnee2 = donnee1[(donnee["Produit"] == menu_prin)]
+                donnee_ordre = donnee_agre.sort_values(by=["TATA","Promoteur"], ascending=False)
+
+        elif tat_indi == "TATA":
+            #donnee2 = donnee1[(donnee["tata"] == menu_sambou)]
+            donnee2 = donnee1.copy()
             donne_vente = donnee2[donnee2["Operation"] == "Vente"]
             donnee_agre = (
-                donne_vente.groupby(["tata","zone","Prenom_Nom_Promoteur","Produit"])
+                donne_vente.groupby(["tata","zone","Produit"])
                 .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
                 .reset_index()
             )
@@ -720,7 +773,6 @@ elif menu == "DETAIL":
                 donnee_agre = donnee_agre.rename(
                     columns={
                         "tata": "TATA",
-                        "Prenom_Nom_Promoteur": "Promoteur",
                         "Quantites_Cartons": "Quantités",
                         "Montant": "CA SEMAINE",
                     }
@@ -729,443 +781,388 @@ elif menu == "DETAIL":
                 donnee_agre = donnee_agre.rename(
                     columns={
                         "tata": "TATA",
-                        "Prenom_Nom_Promoteur": "Promoteur",
                         "Quantites_Cartons": "Quantités",
                         "Montant": "Montant A verser",
                     }
                 )
-            donnee_ordre = donnee_agre.sort_values(by=["TATA","Promoteur"], ascending=False)
-
-    elif tat_indi == "TATA":
-        #donnee2 = donnee1[(donnee["tata"] == menu_sambou)]
-        donnee2 = donnee1.copy()
-        donne_vente = donnee2[donnee2["Operation"] == "Vente"]
-        donnee_agre = (
-            donne_vente.groupby(["tata","zone","Produit"])
-            .agg({"Quantites_Cartons": "sum", "Montant": "sum"})
-            .reset_index()
-        )
-        st.subheader("Ventes de promoteurs")
-        if periode == "Semaine":
-            donnee_agre = donnee_agre.rename(
-                columns={
-                    "tata": "TATA",
-                    "Quantites_Cartons": "Quantités",
-                    "Montant": "CA SEMAINE",
-                }
-            )
+            elif periode == "Mois":
+                donnee_agre = donnee_agre.rename(
+                    columns={
+                        "tata": "TATA",
+                        "Quantites_Cartons": "Quantités",
+                        "Montant": "CA MOIS",
+                    }
+                )
+            donnee_ordre = donnee_agre.sort_values(by=["TATA"], ascending=False)
+            
+        st.dataframe(donnee_ordre.drop("TATA", axis=1))
+        
+        colone= st.columns(3)
+        if periode== "Semaine":
+            colone[1].metric("💴 CA TATA", f"{donnee_ordre['CA SEMAINE'].sum():,.0f}".replace(",", " ")+" XOF")
         elif periode == "Jour":
-            donnee_agre = donnee_agre.rename(
-                columns={
-                    "tata": "TATA",
-                    "Quantites_Cartons": "Quantités",
-                    "Montant": "Montant A verser",
-                }
-            )
+            colone[1].metric("💴 CA TATA", f"{donnee_ordre['Montant A verser'].sum():,.0f}".replace(",", " ")+" XOF")
         elif periode == "Mois":
-            donnee_agre = donnee_agre.rename(
-                columns={
-                    "tata": "TATA",
-                    "Quantites_Cartons": "Quantités",
-                    "Montant": "CA MOIS",
-                }
-            )
-        donnee_ordre = donnee_agre.sort_values(by=["TATA"], ascending=False)
-        
-    st.dataframe(donnee_ordre.drop("TATA", axis=1))
-    
-    colone= st.columns(3)
-    if periode== "Semaine":
-        colone[1].metric("💴 CA TATA", f"{donnee_ordre['CA SEMAINE'].sum():,.0f}".replace(",", " ")+" XOF")
-    elif periode == "Jour":
-        colone[1].metric("💴 CA TATA", f"{donnee_ordre['Montant A verser'].sum():,.0f}".replace(",", " ")+" XOF")
-    elif periode == "Mois":
-        colone[1].metric("💴 CA TATA", f"{donnee_ordre['CA MOIS'].sum():,.0f}".replace(",", " ")+" XOF")
+            colone[1].metric("💴 CA TATA", f"{donnee_ordre['CA MOIS'].sum():,.0f}".replace(",", " ")+" XOF")
 
-#--------------------------FICHE DE PAIE---------------------------------------#
-elif menu == "FICHE":
-    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
-    from reportlab.lib import colors
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.units import cm
-    from io import BytesIO
-    import os
-    #Donnees_Mens = pd.read_excel("Donnees_Mensuelle.xlsx", engine='openpyxl')
-    if periode=="Semaine":
-        Donnees_Mens = Chargement[(Chargement["Operation"] == "Vente") & (Chargement['Numero_semaine'] == semaine)]
-    elif periode=="Mois":
-        Donnees_Mens = Chargement[(Chargement["Operation"] == "Vente") & (Chargement['Mois'] == mois)]
+    #--------------------------FICHE DE PAIE---------------------------------------#
+    elif menu == "FICHE":
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import cm
+        from io import BytesIO
+        import os
+        #Donnees_Mens = pd.read_excel("Donnees_Mensuelle.xlsx", engine='openpyxl')
+        if periode=="Semaine":
+            Donnees_Mens = Chargement[(Chargement["Operation"] == "Vente") & (Chargement['Numero_semaine'] == semaine)]
+        elif periode=="Mois":
+            Donnees_Mens = Chargement[(Chargement["Operation"] == "Vente") & (Chargement['Mois'] == mois)]
 
-    if periode == "Semaine":
-        st.sidebar.markdown("---")
-        password = st.sidebar.text_input("Code d'accès requis", type="password")
-        
-        OMAR = st.secrets["credentials"]["omar"]
-        MANSOUR = st.secrets["credentials"]["mansour"]
-        #OMAR=""
-        #MANSOUR=""
-        if password in [MANSOUR, OMAR]:
-            st.success(f"ACCES AUTORISE POUR {password}")
+        if periode == "Semaine":
+            
             data_semaine = Donnees_Mens[
                 (Donnees_Mens["Numero_semaine"] == semaine) &
                 (Donnees_Mens["Prenom_Nom_Promoteur"] != "Autre") &
                 (Donnees_Mens["Prenom_Nom_Promoteur"].notna())
             ]
-        elif password == "":
-            st.warning("Veuillez entrer un code d'accès pour continuer.")
-            st.stop()
-        else:
-            st.error("Code d'accès incorrect. Veuillez réessayer.")
-            st.stop()
 
-        if data_semaine.empty or data_semaine["Date"].isna().all():
-            st.warning(f"Les informations de la semaine {semaine} ne sont pas encore disponible")
-            st.stop()
-        jour_min = data_semaine["Date"].min().day
-        jour_max = data_semaine["Date"].max().day
-        mois_num = data_semaine["Date"].min().month
-        mois_max = data_semaine["Date"].max().month
-        annee=data_semaine["Date"].min().year
+            if data_semaine.empty or data_semaine["Date"].isna().all():
+                st.warning(f"Les informations de la semaine {semaine} ne sont pas encore disponible")
+                st.stop()
+            jour_min = data_semaine["Date"].min().day
+            jour_max = data_semaine["Date"].max().day
+            mois_num = data_semaine["Date"].min().month
+            mois_max = data_semaine["Date"].max().month
+            annee=data_semaine["Date"].min().year
 
-        mois_fr = {
-            1: "JANVIER", 2: "FÉVRIER", 3: "MARS",
-            4: "AVRIL", 5: "MAI", 6: "JUIN",
-            7: "JUILLET", 8: "AOÛT", 9: "SEPTEMBRE",
-            10: "OCTOBRE", 11: "NOVEMBRE", 12: "DÉCEMBRE"
-        }
-        mois_lettre = mois_fr[mois_num]
-        mois_lettre_max = mois_fr[mois_max]
-        if mois_num != mois_max:
-            texte_periode = f"DU {jour_min} {mois_lettre} AU {jour_max} {mois_lettre_max} {annee}"
-        else:
-            texte_periode = f"DU {jour_min} AU {jour_max} {mois_lettre} {annee}"
-        st.markdown(f"""<h4 style='text-align: center;'>FICHE DE PAIE TATA {texte_periode}</h4>""", unsafe_allow_html=True)
-
-        suivi = data_semaine.groupby(
-            ['Prenom_Nom_Promoteur']
-        )['Date'].nunique().reset_index()
-
-        suivi.rename(columns={
-            'Prenom_Nom_Promoteur': 'Nom',
-            'Date': 'Jours travaillés'
-        }, inplace=True)
-
-        suivi["Salaire"] = suivi["Jours travaillés"].apply(lambda x: 5000 * x)
-
-        total = suivi['Salaire'].sum()
-
-        affichage=suivi.copy()
-        affichage["Nom"] = affichage["Nom"].str.upper()
-        st.dataframe(affichage)
-        st.metric("💰 TOTAL À PAYER TATA", f"{total:,.0f} XOF".replace(",", " "))
-
-        def generate_pdf_paie(df, jour_min, jour_max, mois_lettre, annee, mois_lettre_max, mois_num, mois_max):
-            buffer = BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=A4,
-                                    rightMargin=2*cm, leftMargin=2*cm,
-                                    topMargin=2*cm, bottomMargin=2*cm)
-
-            styles = getSampleStyleSheet()
-            elements = []
+            mois_fr = {
+                1: "JANVIER", 2: "FÉVRIER", 3: "MARS",
+                4: "AVRIL", 5: "MAI", 6: "JUIN",
+                7: "JUILLET", 8: "AOÛT", 9: "SEPTEMBRE",
+                10: "OCTOBRE", 11: "NOVEMBRE", 12: "DÉCEMBRE"
+            }
+            mois_lettre = mois_fr[mois_num]
+            mois_lettre_max = mois_fr[mois_max]
             if mois_num != mois_max:
                 texte_periode = f"DU {jour_min} {mois_lettre} AU {jour_max} {mois_lettre_max} {annee}"
             else:
                 texte_periode = f"DU {jour_min} AU {jour_max} {mois_lettre} {annee}"
-            logo_path = "logo_ande.jpeg"
+            st.markdown(f"""<h4 style='text-align: center;'>FICHE DE PAIE TATA {texte_periode}</h4>""", unsafe_allow_html=True)
 
-            if os.path.exists(logo_path):
-                logo = Image(logo_path, width=1.0*cm, height=1.0*cm)
-            else:
-                logo = Paragraph("", styles["Normal"])
+            suivi = data_semaine.groupby(
+                ['Prenom_Nom_Promoteur']
+            )['Date'].nunique().reset_index()
 
-            tata_text = Paragraph(f"<b>TATA</b>", styles["Heading2"])
+            suivi.rename(columns={
+                'Prenom_Nom_Promoteur': 'Nom',
+                'Date': 'Jours travaillés'
+            }, inplace=True)
 
-            header_table = Table(
-                [[logo, tata_text]],
-                colWidths=[13*cm, 3*cm]
-            )
+            suivi["Salaire"] = suivi["Jours travaillés"].apply(lambda x: 5000 * x)
 
-            header_table.setStyle([
-                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-                ('ALIGN', (1,0), (1,0), 'LEFT'),
-            ])
+            total = suivi['Salaire'].sum()
 
-            elements.append(header_table)
-            elements.append(Spacer(1, 5))
+            affichage=suivi.copy()
+            affichage["Nom"] = affichage["Nom"].str.upper()
+            st.dataframe(affichage)
+            st.metric("💰 TOTAL À PAYER TATA", f"{total:,.0f} XOF".replace(",", " "))
 
-            style_titre = ParagraphStyle(
-                name="TitrePerso",
-                parent=styles["Title"],
-                fontSize=12,
-                leading=14,
-                alignment=1
-            )
+            def generate_pdf_paie(df, jour_min, jour_max, mois_lettre, annee, mois_lettre_max, mois_num, mois_max):
+                buffer = BytesIO()
+                doc = SimpleDocTemplate(buffer, pagesize=A4,
+                                        rightMargin=2*cm, leftMargin=2*cm,
+                                        topMargin=2*cm, bottomMargin=2*cm)
 
-            titre = Table(
-                [[Paragraph(
-                    f"<b>ACTIVATION KAMLAC_PAIE SALAIRES FIXES {texte_periode}</b>",
-                    style_titre
-                )]],
-                colWidths=[16.1*cm]
-            )
+                styles = getSampleStyleSheet()
+                elements = []
+                if mois_num != mois_max:
+                    texte_periode = f"DU {jour_min} {mois_lettre} AU {jour_max} {mois_lettre_max} {annee}"
+                else:
+                    texte_periode = f"DU {jour_min} AU {jour_max} {mois_lettre} {annee}"
+                logo_path = "logo_ande.jpeg"
 
-            titre.setStyle(TableStyle([
-                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#8DD883")),
-                ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-                ('TOPPADDING', (0,0), (-1,-1), 6),
-            ]))
+                if os.path.exists(logo_path):
+                    logo = Image(logo_path, width=1.0*cm, height=1.0*cm)
+                else:
+                    logo = Paragraph("", styles["Normal"])
 
-            elements.append(titre)
-            elements.append(Spacer(0, 0))
+                tata_text = Paragraph(f"<b>TATA</b>", styles["Heading2"])
 
-            data = [["PRENOM & NOM", "JOURS TRAVAILLES", "MONTANT PAYE", "SIGNATURE"]]
+                header_table = Table(
+                    [[logo, tata_text]],
+                    colWidths=[13*cm, 3*cm]
+                )
 
-            for _, row in df.iterrows():
-                data.append([
-                    row["Nom"].upper(),
-                    row["Jours travaillés"],
-                    f"{int(row['Salaire']):,}".replace(",", " "),
-                    ""
+                header_table.setStyle([
+                    ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                    ('ALIGN', (1,0), (1,0), 'LEFT'),
                 ])
 
-            table = Table(data, colWidths=[6.5*cm, 4*cm, 3*cm, 2.5*cm])
+                elements.append(header_table)
+                elements.append(Spacer(1, 5))
 
-            table.setStyle(TableStyle([
-                ('GRID', (0,0), (-1,-1), 1, colors.HexColor("#8DD883")),
-                ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#8DD883")),
-                ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#D7F3CC")),
-                ('TEXTCOLOR', (0,0), (-1,0), colors.black),
-                ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-                ('BACKGROUND', (1,0), (1,0), colors.HexColor("#D7F3CC")),
-                ('TEXTCOLOR', (1,0), (1,0), colors.black),
-                ('ALIGN',(1,1),(-2,-1),'CENTER'),
-                ('ALIGN',(0,0),(-1,0),'CENTER'),
-                ('ALIGN',(0,-1),(0,-1),'CENTER'),
-                ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor("#D7F3CC")),
-                ('TEXTCOLOR', (0,-1), (-1,-1), colors.black),
-                ('FONTNAME', (0,-1), (-1,-1), 'Helvetica-Bold'),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 8),
-                ('TOPPADDING', (0,0), (-1,-1), 8),
-            ]))
+                style_titre = ParagraphStyle(
+                    name="TitrePerso",
+                    parent=styles["Title"],
+                    fontSize=12,
+                    leading=14,
+                    alignment=1
+                )
 
-            elements.append(table)
-            doc.build(elements)
-            buffer.seek(0)
-            return buffer
+                titre = Table(
+                    [[Paragraph(
+                        f"<b>ACTIVATION KAMLAC_PAIE SALAIRES FIXES {texte_periode}</b>",
+                        style_titre
+                    )]],
+                    colWidths=[16.1*cm]
+                )
 
-        df_total = suivi.copy()
-        df_total.loc[len(df_total)] = ["TOTAL", "", total]
+                titre.setStyle(TableStyle([
+                    ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#8DD883")),
+                    ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+                    ('TOPPADDING', (0,0), (-1,-1), 6),
+                ]))
+
+                elements.append(titre)
+                elements.append(Spacer(0, 0))
+
+                data = [["PRENOM & NOM", "JOURS TRAVAILLES", "MONTANT PAYE", "SIGNATURE"]]
+
+                for _, row in df.iterrows():
+                    data.append([
+                        row["Nom"].upper(),
+                        row["Jours travaillés"],
+                        f"{int(row['Salaire']):,}".replace(",", " "),
+                        ""
+                    ])
+
+                table = Table(data, colWidths=[6.5*cm, 4*cm, 3*cm, 2.5*cm])
+
+                table.setStyle(TableStyle([
+                    ('GRID', (0,0), (-1,-1), 1, colors.HexColor("#8DD883")),
+                    ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#8DD883")),
+                    ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#D7F3CC")),
+                    ('TEXTCOLOR', (0,0), (-1,0), colors.black),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('BACKGROUND', (1,0), (1,0), colors.HexColor("#D7F3CC")),
+                    ('TEXTCOLOR', (1,0), (1,0), colors.black),
+                    ('ALIGN',(1,1),(-2,-1),'CENTER'),
+                    ('ALIGN',(0,0),(-1,0),'CENTER'),
+                    ('ALIGN',(0,-1),(0,-1),'CENTER'),
+                    ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor("#D7F3CC")),
+                    ('TEXTCOLOR', (0,-1), (-1,-1), colors.black),
+                    ('FONTNAME', (0,-1), (-1,-1), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+                    ('TOPPADDING', (0,0), (-1,-1), 8),
+                ]))
+
+                elements.append(table)
+                doc.build(elements)
+                buffer.seek(0)
+                return buffer
+
+            df_total = suivi.copy()
+            df_total.loc[len(df_total)] = ["TOTAL", "", total]
+            
+            pdf_file = generate_pdf_paie(df_total, jour_min, jour_max, mois_lettre, annee, mois_lettre_max, mois_num, mois_max)
+
+            if mois_num != mois_max:
+                st.download_button(
+                    label="📥 Télécharger la fiche de paie PDF",
+                    data=pdf_file,
+                    file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} {mois_num} AU {jour_max:02d} {mois_lettre_max} {annee}.pdf",
+                    mime="application/pdf"
+                )
+            else:
+                st.download_button(
+                    label="📥 Télécharger la fiche de paie PDF",
+                    data=pdf_file,
+                    file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} AU {jour_max:02d} {mois_lettre}.pdf",
+                    mime="application/pdf"
+                )
+            
+            if password == OMAR:
+
+                    donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Semaine"] == semaine) & (donnee_RZ["Equipe"] == "RZ")]
+                    CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()
+
+                    colonnne= st.columns(3)
+                    colonnne[0].metric("CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
+                    colonnne[1].metric("CA TATA", f"{Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
+                    colonnne[2].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
+                    colonnne[0].metric("REMISE", f"{donnee_RZ_Livr["Remise"].sum():,.2f}".replace(",", " ")+" XOF")
+
+                    colonnne[1].metric("TRANSPORT TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
+                    colonnne[2].metric("STATIONNEMENT", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
+                    st.markdown("---")
+                    st.markdown(f"<h4 style='text-align: center;'>SALAIRES TATAS : {total:,.2f}".replace(",", " ")+" XOF</h4>", unsafe_allow_html=True)
+                    #Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
+                    #st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
+                    
+                    mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - donnee_RZ_Livr["Remise"].sum()
+                    st.markdown(f"<h2 style='text-align: center;'>MONTANT À VERSER : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
         
-        pdf_file = generate_pdf_paie(df_total, jour_min, jour_max, mois_lettre, annee, mois_lettre_max, mois_num, mois_max)
-
-        if mois_num != mois_max:
-            st.download_button(
-                label="📥 Télécharger la fiche de paie PDF",
-                data=pdf_file,
-                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} {mois_num} AU {jour_max:02d} {mois_lettre_max} {annee}.pdf",
-                mime="application/pdf"
-            )
-        else:
-            st.download_button(
-                label="📥 Télécharger la fiche de paie PDF",
-                data=pdf_file,
-                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} AU {jour_max:02d} {mois_lettre}.pdf",
-                mime="application/pdf"
-            )
-        
-        if password == OMAR:
-
-                donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Semaine"] == semaine) & (donnee_RZ["Equipe"] == "RZ")]
-                CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()
-
-                colonnne= st.columns(3)
-                colonnne[0].metric("CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
-                colonnne[1].metric("CA TATA", f"{Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
-                colonnne[2].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
-                colonnne[0].metric("REMISE", f"{donnee_RZ_Livr["Remise"].sum():,.2f}".replace(",", " ")+" XOF")
-
-                colonnne[1].metric("TRANSPORT TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
-                colonnne[2].metric("STATIONNEMENT", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
-                st.markdown("---")
-                st.markdown(f"<h4 style='text-align: center;'>SALAIRES TATAS : {total:,.2f}".replace(",", " ")+" XOF</h4>", unsafe_allow_html=True)
-                #Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
-                #st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
-                
-                mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - donnee_RZ_Livr["Remise"].sum()
-                st.markdown(f"<h2 style='text-align: center;'>MONTANT À VERSER : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
-    elif periode == "Mois":
-        st.sidebar.markdown("---")
-        password = st.sidebar.text_input("Code d'accès requis", type="password")
-        
-        OMAR = st.secrets["credentials"]["omar"]
-        MANSOUR = st.secrets["credentials"]["mansour"]
-        #OMAR=""
-        #MANSOUR=""
-        if password in [MANSOUR, OMAR]:
-            st.success(f"ACCES AUTORISE POUR {password}")
+        elif periode == "Mois":
+            
             data_mois = Donnees_Mens[
                 (Donnees_Mens["Mois"] == mois) &
                 (Donnees_Mens["Prenom_Nom_Promoteur"] != "Autre") &
                 (Donnees_Mens["Prenom_Nom_Promoteur"].notna())
             ]
-        elif password == "":
-            st.warning("Veuillez entrer un code d'accès pour continuer.")
-            st.stop()
-        else:
-            st.error("Code d'accès incorrect. Veuillez réessayer.")
-            st.stop()
-        if data_mois.empty or data_mois["Date"].isna().all():
-            st.warning(f"Les informations du mois {mois} ne sont pas encore disponible")
-            st.stop()
-        jour_min = data_mois["Date"].min().day
-        jour_max = data_mois["Date"].max().day
-        mois_num = data_mois["Date"].min().month
-        mois_max = data_mois["Date"].max().month
-        annee=data_mois["Date"].min().year
-        mois_fr = {
-            1: "JANVIER", 2: "FÉVRIER", 3: "MARS",
-            4: "AVRIL", 5: "MAI", 6: "JUIN",
-            7: "JUILLET", 8: "AOÛT", 9: "SEPTEMBRE",
-            10: "OCTOBRE", 11: "NOVEMBRE", 12: "DÉCEMBRE"
-        }
-        mois_lettre = mois_fr[mois_num]
-        mois_lettre_max = mois_fr[mois_max]
-        if mois_num != mois_max:
-            texte_periode = f"DU {jour_min} {mois_lettre} AU {jour_max} {mois_lettre_max} {annee}"
-        else:
-            texte_periode = f"DU {jour_min} AU {jour_max} {mois_lettre} {annee}"
-        st.markdown(f"""<h4 style='text-align: center;'>FICHE DE PAIE TATA {texte_periode}</h4>""", unsafe_allow_html=True)
-        suivi = data_mois.groupby(
-            ['Prenom_Nom_Promoteur']
-        )['Date'].nunique().reset_index()
-        suivi.rename(columns={
-            "Prenom_Nom_Promoteur": "Nom",
-            "Date": "Jours travaillés"
-        }, inplace=True)
-        suivi["Salaire"] = suivi["Jours travaillés"].apply(lambda x: 5000 * x)
-        total = suivi["Salaire"].sum()
-        affichage=suivi.copy()
-        affichage["Nom"] = affichage["Nom"].str.upper()
-        st.dataframe(affichage)
-        st.metric("💰 TOTAL À PAYER TATA", f"{total:,.0f} FCFA".replace(",", " "))
 
-        def generate_pdf_paie(df, jour_min, jour_max, mois_lettre, annee, mois_lettre_max, mois_num, mois_max):
-            buffer = BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=A4,
-                                    rightMargin=2*cm, leftMargin=2*cm,
-                                    topMargin=2*cm, bottomMargin=2*cm)
-            styles = getSampleStyleSheet()
-            elements = []
+            if data_mois.empty or data_mois["Date"].isna().all():
+                st.warning(f"Les informations du mois {mois} ne sont pas encore disponible")
+                st.stop()
+            jour_min = data_mois["Date"].min().day
+            jour_max = data_mois["Date"].max().day
+            mois_num = data_mois["Date"].min().month
+            mois_max = data_mois["Date"].max().month
+            annee=data_mois["Date"].min().year
+            mois_fr = {
+                1: "JANVIER", 2: "FÉVRIER", 3: "MARS",
+                4: "AVRIL", 5: "MAI", 6: "JUIN",
+                7: "JUILLET", 8: "AOÛT", 9: "SEPTEMBRE",
+                10: "OCTOBRE", 11: "NOVEMBRE", 12: "DÉCEMBRE"
+            }
+            mois_lettre = mois_fr[mois_num]
+            mois_lettre_max = mois_fr[mois_max]
             if mois_num != mois_max:
                 texte_periode = f"DU {jour_min} {mois_lettre} AU {jour_max} {mois_lettre_max} {annee}"
             else:
                 texte_periode = f"DU {jour_min} AU {jour_max} {mois_lettre} {annee}"
-            logo_path = "logo_ande.jpeg"
-            if os.path.exists(logo_path):
-                logo = Image(logo_path, width=1.0*cm, height=1.0*cm)
-            else:
-                logo = Paragraph("", styles["Normal"])
-            tata_text = Paragraph(f"<b>TATA</b>", styles["Heading2"])
-            header_table = Table(
-                [[logo, tata_text]],
-                colWidths=[13*cm, 3*cm]
-            )
-            header_table.setStyle([
-                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-                ('ALIGN', (1,0), (1,0), 'LEFT'),
-            ])
-            elements.append(header_table)
-            elements.append(Spacer(1, 5))
-            style_titre = ParagraphStyle(
-                name="TitrePerso",
-                parent=styles["Title"],
-                fontSize=12,
-                leading=14,
-                alignment=1
-            )
-            titre = Table(
-                [[Paragraph(
-                    f"<b>ACTIVATION KAMLAC_PAIE SALAIRES FIXES {texte_periode}</b>",
-                    style_titre
-                )]],
-                colWidths=[16.1*cm]
-            )
-            titre.setStyle(TableStyle([
-                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#8DD883")),
-                ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-                ('TOPPADDING', (0,0), (-1,-1), 6),
-            ]))
-            elements.append(titre)
-            elements.append(Spacer(0, 0))
-            data = [["PRENOM & NOM", "JOURS TRAVAILLES", "MONTANT PAYE", "SIGNATURE"]]
-            for _, row in df.iterrows():
-                data.append([
-                    row["Nom"].upper(),
-                    row["Jours travaillés"],
-                    f"{int(row['Salaire']):,}".replace(",", " "),
-                    ""
+            st.markdown(f"""<h4 style='text-align: center;'>FICHE DE PAIE TATA {texte_periode}</h4>""", unsafe_allow_html=True)
+            suivi = data_mois.groupby(
+                ['Prenom_Nom_Promoteur']
+            )['Date'].nunique().reset_index()
+            suivi.rename(columns={
+                "Prenom_Nom_Promoteur": "Nom",
+                "Date": "Jours travaillés"
+            }, inplace=True)
+            suivi["Salaire"] = suivi["Jours travaillés"].apply(lambda x: 5000 * x)
+            total = suivi["Salaire"].sum()
+            affichage=suivi.copy()
+            affichage["Nom"] = affichage["Nom"].str.upper()
+            st.dataframe(affichage)
+            st.metric("💰 TOTAL À PAYER TATA", f"{total:,.0f} FCFA".replace(",", " "))
+
+            def generate_pdf_paie(df, jour_min, jour_max, mois_lettre, annee, mois_lettre_max, mois_num, mois_max):
+                buffer = BytesIO()
+                doc = SimpleDocTemplate(buffer, pagesize=A4,
+                                        rightMargin=2*cm, leftMargin=2*cm,
+                                        topMargin=2*cm, bottomMargin=2*cm)
+                styles = getSampleStyleSheet()
+                elements = []
+                if mois_num != mois_max:
+                    texte_periode = f"DU {jour_min} {mois_lettre} AU {jour_max} {mois_lettre_max} {annee}"
+                else:
+                    texte_periode = f"DU {jour_min} AU {jour_max} {mois_lettre} {annee}"
+                logo_path = "logo_ande.jpeg"
+                if os.path.exists(logo_path):
+                    logo = Image(logo_path, width=1.0*cm, height=1.0*cm)
+                else:
+                    logo = Paragraph("", styles["Normal"])
+                tata_text = Paragraph(f"<b>TATA</b>", styles["Heading2"])
+                header_table = Table(
+                    [[logo, tata_text]],
+                    colWidths=[13*cm, 3*cm]
+                )
+                header_table.setStyle([
+                    ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                    ('ALIGN', (1,0), (1,0), 'LEFT'),
                 ])
-            table = Table(data, colWidths=[6.5*cm, 4*cm, 3*cm, 2.5*cm])
-            table.setStyle(TableStyle([
-                ('GRID', (0,0), (-1,-1), 1, colors.HexColor("#8DD883")),
-                ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#8DD883")),
-                ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#D7F3CC")),
-                ('TEXTCOLOR', (0,0), (-1,0), colors.black),
-                ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-                ('BACKGROUND', (1,0), (1,0), colors.HexColor("#D7F3CC")),
-                ('TEXTCOLOR', (1,0), (1,0), colors.black),
-                ('ALIGN',(1,1),(-2,-1),'CENTER'),
-                ('ALIGN',(0,0),(-1,0),'CENTER'),
-                ('ALIGN',(0,-1),(0,-1),'CENTER'),
-                ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor("#D7F3CC")),
-                ('TEXTCOLOR', (0,-1), (-1,-1), colors.black),
-                ('FONTNAME', (0,-1), (-1,-1), 'Helvetica-Bold'),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 8),
-                ('TOPPADDING', (0,0), (-1,-1), 8),
-            ]))
-            elements.append(table)
-            doc.build(elements)
-            buffer.seek(0)
-            return buffer
-        df_total = suivi.copy()
-        df_total.loc[len(df_total)] = ["TOTAL", "", total]
-        pdf_file = generate_pdf_paie(df_total, jour_min, jour_max, mois_lettre, annee, mois_lettre_max, mois_num, mois_max)
-        if mois_num != mois_max:
-            st.download_button(
-                label="📥 Télécharger la fiche de paie PDF",
-                data=pdf_file,
-                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} {mois_num} AU {jour_max:02d} {mois_lettre_max} {annee}.pdf",
-                mime="application/pdf"
-            )
+                elements.append(header_table)
+                elements.append(Spacer(1, 5))
+                style_titre = ParagraphStyle(
+                    name="TitrePerso",
+                    parent=styles["Title"],
+                    fontSize=12,
+                    leading=14,
+                    alignment=1
+                )
+                titre = Table(
+                    [[Paragraph(
+                        f"<b>ACTIVATION KAMLAC_PAIE SALAIRES FIXES {texte_periode}</b>",
+                        style_titre
+                    )]],
+                    colWidths=[16.1*cm]
+                )
+                titre.setStyle(TableStyle([
+                    ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#8DD883")),
+                    ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+                    ('TOPPADDING', (0,0), (-1,-1), 6),
+                ]))
+                elements.append(titre)
+                elements.append(Spacer(0, 0))
+                data = [["PRENOM & NOM", "JOURS TRAVAILLES", "MONTANT PAYE", "SIGNATURE"]]
+                for _, row in df.iterrows():
+                    data.append([
+                        row["Nom"].upper(),
+                        row["Jours travaillés"],
+                        f"{int(row['Salaire']):,}".replace(",", " "),
+                        ""
+                    ])
+                table = Table(data, colWidths=[6.5*cm, 4*cm, 3*cm, 2.5*cm])
+                table.setStyle(TableStyle([
+                    ('GRID', (0,0), (-1,-1), 1, colors.HexColor("#8DD883")),
+                    ('BOX', (0,0), (-1,-1), 2, colors.HexColor("#8DD883")),
+                    ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#D7F3CC")),
+                    ('TEXTCOLOR', (0,0), (-1,0), colors.black),
+                    ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                    ('BACKGROUND', (1,0), (1,0), colors.HexColor("#D7F3CC")),
+                    ('TEXTCOLOR', (1,0), (1,0), colors.black),
+                    ('ALIGN',(1,1),(-2,-1),'CENTER'),
+                    ('ALIGN',(0,0),(-1,0),'CENTER'),
+                    ('ALIGN',(0,-1),(0,-1),'CENTER'),
+                    ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor("#D7F3CC")),
+                    ('TEXTCOLOR', (0,-1), (-1,-1), colors.black),
+                    ('FONTNAME', (0,-1), (-1,-1), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+                    ('TOPPADDING', (0,0), (-1,-1), 8),
+                ]))
+                elements.append(table)
+                doc.build(elements)
+                buffer.seek(0)
+                return buffer
+            df_total = suivi.copy()
+            df_total.loc[len(df_total)] = ["TOTAL", "", total]
+            pdf_file = generate_pdf_paie(df_total, jour_min, jour_max, mois_lettre, annee, mois_lettre_max, mois_num, mois_max)
+            if mois_num != mois_max:
+                st.download_button(
+                    label="📥 Télécharger la fiche de paie PDF",
+                    data=pdf_file,
+                    file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} {mois_num} AU {jour_max:02d} {mois_lettre_max} {annee}.pdf",
+                    mime="application/pdf"
+                )
+            else:
+                st.download_button(
+                    label="📥 Télécharger la fiche de paie PDF",
+                    data=pdf_file,
+                    file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} AU {jour_max:02d} {mois_lettre}.pdf",
+                    mime="application/pdf"
+                )
+            if password == OMAR:
+                    donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Mois"] == mois) & (donnee_RZ["Equipe"] == "RZ")]
+                    CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()
+
+                    colonnne= st.columns(3)
+                    colonnne[0].metric("CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
+                    colonnne[1].metric("CA TATA", f"{Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
+                    colonnne[2].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
+                    colonnne[0].metric("REMISE", f"{donnee_RZ_Livr["Remise"].sum():,.2f}".replace(",", " ")+" XOF")
+
+                    colonnne[1].metric("TRANSPORT TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
+                    colonnne[2].metric("STATIONNEMENT", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
+                    st.markdown("---")
+                    st.markdown(f"<h4 style='text-align: center;'>SALAIRES TATAS : {total:,.2f}".replace(",", " ")+" XOF</h4>", unsafe_allow_html=True)
+                    #Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
+                    #st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
+                    
+                    mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - donnee_RZ_Livr["Remise"].sum()
+                    st.markdown(f"<h2 style='text-align: center;'>MONTANT VERSER : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
+
         else:
-            st.download_button(
-                label="📥 Télécharger la fiche de paie PDF",
-                data=pdf_file,
-                file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} AU {jour_max:02d} {mois_lettre}.pdf",
-                mime="application/pdf"
-            )
-        if password == OMAR:
-                donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Mois"] == mois) & (donnee_RZ["Equipe"] == "RZ")]
-                CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()
-
-                colonnne= st.columns(3)
-                colonnne[0].metric("CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
-                colonnne[1].metric("CA TATA", f"{Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
-                colonnne[2].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
-                colonnne[0].metric("REMISE", f"{donnee_RZ_Livr["Remise"].sum():,.2f}".replace(",", " ")+" XOF")
-
-                colonnne[1].metric("TRANSPORT TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
-                colonnne[2].metric("STATIONNEMENT", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
-                st.markdown("---")
-                st.markdown(f"<h4 style='text-align: center;'>SALAIRES TATAS : {total:,.2f}".replace(",", " ")+" XOF</h4>", unsafe_allow_html=True)
-                #Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
-                #st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
-                
-                mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - donnee_RZ_Livr["Remise"].sum()
-                st.markdown(f"<h2 style='text-align: center;'>MONTANT À VERSER PAR OMAR : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
-
-    else:
-        st.warning("Disponible uniquement en mode Semaine et mois")
+            st.warning("Disponible uniquement en mode Semaine et mois")
