@@ -164,9 +164,16 @@ def login():
         password = st.text_input("Mot de passe", type="password")
         submit = st.form_submit_button("Connexion")
         if submit:
-            if  password in [OMAR,MANSOUR]:
+            if password == OMAR:
                 st.session_state.authentifie = True
-                st.success("✅ Connexion réussie !")
+                st.session_state.utilisateur = "OMAR"
+                st.rerun()
+
+            elif password == MANSOUR:
+                st.session_state.authentifie = True
+                st.session_state.utilisateur = "MANSOUR"
+                st.rerun()
+
             elif password == "":
                 st.warning("Veuillez vous connecter pour accéder à votre espace.")
                 st.stop()
@@ -180,6 +187,9 @@ def ande_sarl() :
     colone= st.columns(5)
     # Choix de l’onglet
     menu = st.sidebar.radio("Navigation", ["AGREGATION","DETAIL","FICHE"])
+    deconnecter = st.form_submit_button("Se déconnecter")
+    if deconnecter:
+        st.session_state.authentifie = False
     periode = colone[0].selectbox("", ["Jour","Semaine","Mois"])
     if periode == "Jour":
         semaine = colone[2].selectbox("", num_semaine)
@@ -278,13 +288,13 @@ def ande_sarl() :
             
             st.markdown(f"<h4 style='text-align: center;'>!---------- Stock restant après les ventes du {datea} ----------!</h4><br>", unsafe_allow_html=True)
             
-            if password == OMAR:
+            if st.session_state.get("utilisateur") == OMAR:
                 st.success("BIENVENUE SUR L'ESPACE ANDE")
                 #if sous_menu=="Stock":
                 #       prom = colone[3].selectbox("", ["TATA 1", "TATA 2", "TATA 3","Tous les TATAS"])
                 #else:
                     #prom = colone[4].selectbox("", ["TATA 1", "TATA 2", "TATA 3","Tous les TATAS"]) 
-            elif password == MANSOUR:
+            elif if st.session_state.get("utilisateur") == MANSOUR:
                 st.success("Accès autorisé, vous êtes connectés avec les identifiants de MANSOUR")
             #   prom = "TATA 2"
         
@@ -525,7 +535,8 @@ def ande_sarl() :
 
                 
                 # Chiffre d'affaires réalisé, centré sous le tableau
-                if password != OMAR:
+                if st.session_state.get("utilisateur") != OMAR:
+                #if password != OMAR:
                     chiffre_affaires_formate = f"{chiffre_affaires:,.0f}".replace(",", " ")
 
                     fig.text(
@@ -985,26 +996,26 @@ def ande_sarl() :
                     mime="application/pdf"
                 )
             
-            if password == OMAR:
+            if st.session_state.get("utilisateur") == OMAR:
 
-                    donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Semaine"] == semaine) & (donnee_RZ["Equipe"] == "RZ")]
-                    CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()
+                donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Semaine"] == semaine) & (donnee_RZ["Equipe"] == "RZ")]
+                CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()
 
-                    colonnne= st.columns(3)
-                    colonnne[0].metric("CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
-                    colonnne[1].metric("CA TATA", f"{Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
-                    colonnne[2].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
-                    colonnne[0].metric("REMISE", f"{donnee_RZ_Livr["Remise"].sum():,.2f}".replace(",", " ")+" XOF")
+                colonnne= st.columns(3)
+                colonnne[0].metric("CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
+                colonnne[1].metric("CA TATA", f"{Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
+                colonnne[2].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
+                colonnne[0].metric("REMISE", f"{donnee_RZ_Livr["Remise"].sum():,.2f}".replace(",", " ")+" XOF")
 
-                    colonnne[1].metric("TRANSPORT TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
-                    colonnne[2].metric("STATIONNEMENT", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
-                    st.markdown("---")
-                    st.markdown(f"<h4 style='text-align: center;'>SALAIRES TATAS : {total:,.2f}".replace(",", " ")+" XOF</h4>", unsafe_allow_html=True)
-                    #Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
-                    #st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
-                    
-                    mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - donnee_RZ_Livr["Remise"].sum()
-                    st.markdown(f"<h2 style='text-align: center;'>MONTANT À VERSER : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
+                colonnne[1].metric("TRANSPORT TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
+                colonnne[2].metric("STATIONNEMENT", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
+                st.markdown("---")
+                st.markdown(f"<h4 style='text-align: center;'>SALAIRES TATAS : {total:,.2f}".replace(",", " ")+" XOF</h4>", unsafe_allow_html=True)
+                #Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
+                #st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
+                
+                mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - donnee_RZ_Livr["Remise"].sum()
+                st.markdown(f"<h2 style='text-align: center;'>MONTANT À VERSER : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
         
         elif periode == "Mois":
 
@@ -1145,25 +1156,25 @@ def ande_sarl() :
                     file_name=f"FICHE DE PAIE TATA DU {jour_min:02d} AU {jour_max:02d} {mois_lettre}.pdf",
                     mime="application/pdf"
                 )
-            if password == OMAR:
-                    donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Mois"] == mois) & (donnee_RZ["Equipe"] == "RZ")]
-                    CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()
+            if st.session_state.get("utilisateur") == OMAR:
+                donnee_RZ_Livr= donnee_RZ[(donnee_RZ["Operation"] == "FACTURE") & (donnee_RZ["Mois"] == mois) & (donnee_RZ["Equipe"] == "RZ")]
+                CA_donnee_RZ=donnee_RZ_Livr["Montant"].sum()
 
-                    colonnne= st.columns(3)
-                    colonnne[0].metric("CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
-                    colonnne[1].metric("CA TATA", f"{Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
-                    colonnne[2].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
-                    colonnne[0].metric("REMISE", f"{donnee_RZ_Livr["Remise"].sum():,.2f}".replace(",", " ")+" XOF")
+                colonnne= st.columns(3)
+                colonnne[0].metric("CA RZ", f"{CA_donnee_RZ:,.2f}".replace(",", " ")+" XOF")
+                colonnne[1].metric("CA TATA", f"{Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
+                colonnne[2].metric("CA TOTAL (RZ + TATA)", f"{CA_donnee_RZ+Donnees_Mens['Montant'].sum():,.2f}".replace(",", " ")+" XOF")
+                colonnne[0].metric("REMISE", f"{donnee_RZ_Livr["Remise"].sum():,.2f}".replace(",", " ")+" XOF")
 
-                    colonnne[1].metric("TRANSPORT TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
-                    colonnne[2].metric("STATIONNEMENT", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
-                    st.markdown("---")
-                    st.markdown(f"<h4 style='text-align: center;'>SALAIRES TATAS : {total:,.2f}".replace(",", " ")+" XOF</h4>", unsafe_allow_html=True)
-                    #Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
-                    #st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
-                    
-                    mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - donnee_RZ_Livr["Remise"].sum()
-                    st.markdown(f"<h2 style='text-align: center;'>MONTANT VERSER : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
+                colonnne[1].metric("TRANSPORT TATA", f"{transport['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
+                colonnne[2].metric("STATIONNEMENT", f"{stationnement['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
+                st.markdown("---")
+                st.markdown(f"<h4 style='text-align: center;'>SALAIRES TATAS : {total:,.2f}".replace(",", " ")+" XOF</h4>", unsafe_allow_html=True)
+                #Depenses = transport["Transport"].sum() + stationnement["Stationnement"].sum() + total
+                #st.markdown(f"<h3 style='text-align: center;'>SALAIRES + TRANSPORT + STATIONNEMENT : {Depenses:,.2f}".replace(",", " ")+" XOF</h3>", unsafe_allow_html=True)
+                
+                mnt_verser = (CA_donnee_RZ + Donnees_Mens['Montant'].sum()) - donnee_RZ_Livr["Remise"].sum()
+                st.markdown(f"<h2 style='text-align: center;'>MONTANT VERSER : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
 
         else:
             st.warning("Disponible uniquement en mode Semaine et mois")
