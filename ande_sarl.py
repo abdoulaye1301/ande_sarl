@@ -166,12 +166,12 @@ def login():
         if submit:
             if password == OMAR:
                 st.session_state.authentifie = True
-                st.session_state.utilisateur = "OMAR"
+                st.session_state.utilisateur = OMAR
                 st.rerun()
 
             elif password == MANSOUR:
                 st.session_state.authentifie = True
-                st.session_state.utilisateur = "MANSOUR"
+                st.session_state.utilisateur = MANSOUR
                 st.rerun()
 
             elif password == "":
@@ -187,7 +187,7 @@ def ande_sarl() :
     colone= st.columns(5)
     # Choix de l’onglet
     menu = st.sidebar.radio("Navigation", ["AGREGATION","DETAIL","FICHE"])
-    deconnecter = st.button("Se déconnecter")
+    deconnecter = st.sidebar.button("Se déconnecter")
     if deconnecter:
         st.session_state.authentifie = False
     periode = colone[0].selectbox("", ["Jour","Semaine","Mois"])
