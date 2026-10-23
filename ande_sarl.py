@@ -173,11 +173,7 @@ def login():
                 st.error("❌ Identifiant incorrect. Veuillez réessayer.")
                 st.stop()
 
-
-if not st.session_state.authentifie :
-    st.warning("Veuillez vous connecter pour accéder aux données.")
-    login()
-else :
+def ande_sarl() :
     # Définir les bornes du slider
     num_semaine = Chargement["Numero_semaine"].unique()
     colone= st.columns(5)
@@ -1170,3 +1166,11 @@ else :
 
         else:
             st.warning("Disponible uniquement en mode Semaine et mois")
+
+
+if not st.session_state.authentifie :
+    login()
+    if st.session_state.authentifie:
+        ande_sarl()
+else :
+    ande_sarl()
