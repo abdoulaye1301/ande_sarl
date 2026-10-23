@@ -152,9 +152,10 @@ MANSOUR = st.secrets["credentials"]["mansour"]
 #MANSOUR=""
 
 #========================INITIALISATION=======================#
-password=""
+
 if "authentifie" not in st.session_state:
     st.session_state.authentifie = False
+    password=""
 # =======================CONNEXION=====================================#
 def login():
     #st.sidebar.title("🔐 Connexion")
