@@ -150,7 +150,11 @@ OMAR = st.secrets["credentials"]["omar"]
 MANSOUR = st.secrets["credentials"]["mansour"]
 #OMAR=""
 #MANSOUR=""
+
+#========================INITIALISATION=======================#
 password=""
+if "authentifie" not in st.session_state:
+    st.session_state.authentifie = False
 # =======================CONNEXION=====================================#
 def login():
     #st.sidebar.title("🔐 Connexion")
@@ -170,7 +174,7 @@ def login():
                 st.stop()
 
 
-if not st.session_state.authentifie:
+if not st.session_state.authentifie :
     st.warning("Veuillez vous connecter pour accéder aux données.")
     login()
 else :
@@ -1006,7 +1010,7 @@ else :
                     st.markdown(f"<h2 style='text-align: center;'>MONTANT À VERSER : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
         
         elif periode == "Mois":
-            
+
             data_mois = Donnees_Mens[
                 (Donnees_Mens["Mois"] == mois) &
                 (Donnees_Mens["Prenom_Nom_Promoteur"] != "Autre") &
