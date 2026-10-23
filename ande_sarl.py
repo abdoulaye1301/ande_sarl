@@ -542,6 +542,8 @@ if menu == "AGREGATION":
                     zone_vals = Chargement[(Chargement["Numero_semaine"] == semaine)]["zone"].dropna().unique()
                     zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
                     nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
+                    if password == OMAR and nb_promoteurs < 15 :
+                        nb_promoteurs = 15
                     commente = Chargement[(Chargement["Numero_semaine"] == semaine)]["Commentaire"].dropna().unique().tolist()
                     ca_realise = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Operation'] == "Vente")]["Montant"].sum()
             elif periode == "Mois":
