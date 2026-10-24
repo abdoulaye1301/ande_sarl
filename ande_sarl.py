@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-from PIL import Image
+#from PIL import Image as PILImage
 from matplotlib.patches import Rectangle
 from matplotlib.patches import FancyBboxPatch
 import textwrap
@@ -9,12 +8,26 @@ import matplotlib.pyplot as plt
 from openpyxl import load_workbook
 from io import BytesIO
 from matplotlib.image import imread
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm
+import os
+from connexion import login
+from barre_navigation import barre_de_navigation, barre_accueil
+from a_propos import propos
+from accueil import page_accueil
+from fichiers.style import style_ande_sarl
 
 st.set_page_config(
     page_title="Ingénieur NDAO", layout="wide", page_icon="ndao abdoulaye.png"
 )
-profil = Image.open("logo_ande.jpeg")
-st.logo(profil)
+#profil = PILImage.open("logo_ande.jpeg")
+#st.logo(profil)
+
+#===================STYLE CSS ====================#
+style_ande_sarl()
 
 # Upload du fichier Excel
 
@@ -148,69 +161,59 @@ donnee_RZ["Semaine"] = donnee_RZ["Date"].apply(lambda x: pd.Timestamp(x).isocale
 #password = st.sidebar.text_input("Veuillez entrer le code d'accès", type="password")
 OMAR = st.secrets["credentials"]["omar"]
 MANSOUR = st.secrets["credentials"]["mansour"]
-#OMAR=""
-#MANSOUR=""
+
 
 #========================INITIALISATION=======================#
 
 if "authentifie" not in st.session_state:
     st.session_state.authentifie = False
     password=""
-# =======================CONNEXION=====================================#
-def login():
-    #st.sidebar.title("🔐 Connexion")
-    with st.sidebar.form("login_form"):
-        #user = st.text_input("Nom d'utilisateur")
-        password = st.text_input("Mot de passe", type="password")
-        submit = st.form_submit_button("Connexion")
-        if submit:
-            if password == OMAR:
-                st.session_state.authentifie = True
-                st.session_state.utilisateur = OMAR
-                st.success("BIENVENUE SUR L'ESPACE ANDE")
-                st.rerun()
 
-            elif password == MANSOUR:
-                st.session_state.authentifie = True
-                st.session_state.utilisateur = MANSOUR
-                st.success("Accès autorisé, vous êtes connectés avec les identifiants de MANSOUR")
-                st.rerun()
+if "afficher_login" not in st.session_state:
+    st.session_state.afficher_login = False
 
-            elif password == "":
-                st.warning("Veuillez vous connecter pour accéder à votre espace.")
-                st.stop()
-            else:
-                st.error("❌ Identifiant incorrect. Veuillez réessayer.")
-                st.stop()
 
 def ande_sarl() :
+     # Afficher la barre de navigation
+    barre_de_navigation()
+
+    # Récupérer la page sélectionnée
+    menu = st.session_state.get("menu", "ACCUEIL")
+
+    # Afficher uniquement la page À PROPOS
+    if menu == "A PROPOS":
+        propos()
+        return
+
+    if menu == "ACCUEIL":
+        page_accueil()
+        return
+    
     # Définir les bornes du slider
     num_semaine = Chargement["Numero_semaine"].unique()
-    colone= st.columns(5)
+    
+    colone= st.columns(7)
     # Choix de l’onglet
-    menu = st.sidebar.radio("Navigation", ["AGREGATION","DETAIL","FICHE"])
-    deconnecter = st.sidebar.button("Se déconnecter")
-    if deconnecter:
-        st.session_state.authentifie = False
+    #menu = st.sidebar.radio("Navigation", ["AGREGATION","DETAIL","FICHE"])
     periode = colone[0].selectbox("", ["Jour","Semaine","Mois"])
     if periode == "Jour":
-        semaine = colone[2].selectbox("", num_semaine)
+        semaine = colone[4].selectbox("", num_semaine)
         min_date = Chargement[Chargement["Numero_semaine"] == semaine]["Date"].dropna().unique()
-        dat = colone[4].selectbox("", min_date)
+        dat = colone[6].selectbox("", min_date)
         datea = dat.strftime("%d-%m-%Y")
         statio = Chargement[(Chargement["Date"] == dat)]
         stationnement = Team_Leader[(Team_Leader["Date"] == dat)]
         transport = Team_Leader[(Team_Leader["Date"] == dat)]
         donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Date"] == dat)]
     elif periode == "Semaine":
-        semaine = colone[2].selectbox("", num_semaine)
+        semaine = colone[3].selectbox("", num_semaine)
         statio = Chargement[(Chargement["Numero_semaine"] == semaine)]
         stationnement = Team_Leader[(Team_Leader["Numero_semaine"] == semaine)]
         transport = Team_Leader[(Team_Leader["Numero_semaine"] == semaine)]
         datea = semaine
         donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Numero_semaine"] == semaine)]
     elif periode == "Mois":
-        mois = colone[2].selectbox("", Chargement["Mois"].unique())
+        mois = colone[3].selectbox("", Chargement["Mois"].unique())
         statio = Chargement[(Chargement["Mois"] == mois)]
         stationnement = Team_Leader[(Team_Leader["Mois"] == mois)]
         transport = Team_Leader[(Team_Leader["Mois"] == mois)]
@@ -218,7 +221,12 @@ def ande_sarl() :
         donne_vente = Chargement[(Chargement["Operation"] == "Vente") & (Chargement["Mois"] == mois)]
     #------------------------MENU AGREGATION-----------------------------------------#
     if menu == "AGREGATION":
-        sous_menu = st.sidebar.selectbox("", ["Versement","Stock","Stock Départ","Récapitulatif"])
+        if periode == "Jour":
+            sous_menu = colone[2].selectbox("", ["Versement","Stock","Stock Départ","Récapitulatif"])
+        elif periode == "Semaine":
+            sous_menu = colone[6].selectbox("", ["Versement","Stock","Stock Départ","Récapitulatif"])
+        elif periode == "Mois":
+            sous_menu = colone[6].selectbox("", ["Versement","Stock","Stock Départ","Récapitulatif"])
         if sous_menu == "Versement":
             donnee_agre = (
                 donne_vente.groupby(["tata"])
@@ -560,7 +568,7 @@ def ande_sarl() :
                     zone_vals = Chargement[ (Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat)]["zone"].dropna().unique()
                     zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
                     nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
-                    if password == OMAR and nb_promoteurs < 15 :
+                    if st.session_state.get("utilisateur") == OMAR and nb_promoteurs < 15 :
                         nb_promoteurs = 15
                     commente = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat)]["Commentaire"].dropna().unique().tolist()
                     ca_realise = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Operation'] == "Vente")]["Montant"].sum()
@@ -661,12 +669,12 @@ def ande_sarl() :
         donnee1 = donnee.copy()
         nom_promo=donnee1["Prenom_Nom_Promoteur"].dropna().unique().tolist()
         produit_list=donnee1[donnee1["Operation"] == "Vente"]["Produit"].dropna().unique().tolist()
-        tat_indi= st.sidebar.selectbox("Option", ["TATA","INDIVIDUEL"])
+        tat_indi=colone[1].selectbox("", ["TATA","INDIVIDUEL"])
         if tat_indi == "INDIVIDUEL":
-            choix= st.sidebar.selectbox("Votre choix", ["Promoteur","Produit"])
+            choix= colone[2].selectbox("", ["Promoteur","Produit"])
             if choix == "Promoteur":
                 if periode == "Jour":
-                    promoteur = st.sidebar.selectbox("Promoteurs", nom_promo)
+                    promoteur = colone[3].selectbox("", nom_promo)
                     donnee2 = donnee1[(donnee["Prenom_Nom_Promoteur"] == promoteur)]
                     donne_vente = donnee2[donnee2["Operation"] == "Vente"]
                     if promoteur=="Autre":
@@ -734,7 +742,7 @@ def ande_sarl() :
                     )
                     donnee_ordre = donnee_agre.sort_values(by=["Promoteur"], ascending=False)
             elif choix == "Produit":
-                menu_prin=st.sidebar.selectbox("PRODUITS", produit_list)
+                menu_prin=colone[3].selectbox("", produit_list)
                 donnee2 = donnee1[(donnee["Produit"] == menu_prin)]
                 donne_vente = donnee2[donnee2["Operation"] == "Vente"]
                 donnee_agre = (
@@ -811,13 +819,6 @@ def ande_sarl() :
 
     #--------------------------FICHE DE PAIE---------------------------------------#
     elif menu == "FICHE":
-        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
-        from reportlab.lib import colors
-        from reportlab.lib.pagesizes import A4
-        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-        from reportlab.lib.units import cm
-        from io import BytesIO
-        import os
         #Donnees_Mens = pd.read_excel("Donnees_Mensuelle.xlsx", engine='openpyxl')
         if periode=="Semaine":
             Donnees_Mens = Chargement[(Chargement["Operation"] == "Vente") & (Chargement['Numero_semaine'] == semaine)]
@@ -1172,10 +1173,19 @@ def ande_sarl() :
             st.warning("Disponible uniquement en mode Semaine et mois")
 
 
-if not st.session_state.authentifie :
-    st.warning("Veuillez vous connecter pour accéder à votre espace.")
-    login()
-    if st.session_state.authentifie:
-        ande_sarl()
-else :
+# ======================== GESTION DE LA CONNEXION ======================== #
+
+if "authentifie" not in st.session_state:
+    st.session_state.authentifie = False
+
+if "afficher_login" not in st.session_state:
+    st.session_state.afficher_login = False
+
+if st.session_state.authentifie:
+    st.session_state.afficher_login = False
     ande_sarl()
+else:
+    barre_accueil()
+    if not st.session_state.afficher_login:
+        if st.session_state.get("menu_accueil") != "A PROPOS" and st.session_state.get("menu_accueil") != "ACCUEIL":
+            st.warning("Veuillez vous connecter pour accéder à votre espace.")
