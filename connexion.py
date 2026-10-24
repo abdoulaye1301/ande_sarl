@@ -3,8 +3,8 @@ import streamlit as st
 from fichiers.style import style_connexion
 import base64
 
-OMAR = ""
-MANSOUR = ""
+OMAR = st.secrets["credentials"]["omar"]
+MANSOUR = st.secrets["credentials"]["mansour"]
 
 
 def login():
