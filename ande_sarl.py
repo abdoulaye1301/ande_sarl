@@ -346,6 +346,7 @@ def ande_sarl() :
             stock_init = stock_lundi.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
             ventes_total = ventes.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
             stock_descente = descente.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
+            montant_restant = descente.groupby(['tata', 'Produit'])['Montant'].sum()
 
             stock_Theorique = stock_init.subtract(ventes_total, fill_value=0)
 
@@ -353,10 +354,13 @@ def ande_sarl() :
             df_final['Stock Restant'] = df_final.apply(
                 lambda row: stock_descente.get((row['tata'], row['Produit']), 0), axis=1
             )
-                
+            df_final['Montant Restant'] = df_final.apply(
+                lambda row: montant_restant.get((row['tata'], row['Produit']), 0), axis=1
+            )
+
             df_final['Stock Théorique'] = df_final['Stock Théorique'].astype(float).round(2)
             df_final['Stock Restant'] = df_final['Stock Restant'].astype(float).round(2)
-
+            df_final['Montant Restant'] = df_final['Montant Restant'].astype(float).round(2)
             df_final['Statut'] = df_final.apply(
                 lambda row: 'OK' if row['Stock Théorique'] == row['Stock Restant'] else 'Différence',
                 axis=1
