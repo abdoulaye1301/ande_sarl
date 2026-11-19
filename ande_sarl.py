@@ -82,7 +82,7 @@ Team_Leader["Date Remplissage"] = pd.to_datetime(Team_Leader["Date Remplissage"]
 Team_Leader["team_leader"] = Team_Leader["team_leader"].apply(lambda x: "ALIOUNE BADARA (MANSOUR) SANE" if x == "sane_mansour" else 
                                                               ("IBRAHIMA COLY" if x=="coly_ibrahima" else x))
 Team_Leader["tata"] = Team_Leader["team_leader"].apply(lambda x: "TATA 2" if x == "ALIOUNE BADARA (MANSOUR) SANE" else 
-                                                                           ("TATA 1" if x=="coly_ibrahima" else x))
+                                                                           ("TATA 1" if x=="IBRAHIMA COLY" else x))
 
 #st.write(Team_Leader.head())
 
