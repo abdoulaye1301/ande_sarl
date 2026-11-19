@@ -5,6 +5,7 @@ import base64
 
 OMAR = st.secrets["credentials"]["omar"]
 MANSOUR = st.secrets["credentials"]["mansour"]
+IBRAHIMA = st.secrets["credentials"]["ibrahima"]
 
 
 def login():
@@ -45,9 +46,9 @@ def login():
                 st.session_state.afficher_login = False
                 st.rerun()
 
-            elif password == MANSOUR:
+            elif password in [MANSOUR,IBRAHIMA]:
                 st.session_state.authentifie = True
-                st.session_state.utilisateur = MANSOUR
+                st.session_state.utilisateur = password
                 st.session_state.afficher_login = False
                 st.rerun()
 
