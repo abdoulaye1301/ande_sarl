@@ -262,7 +262,7 @@ def ande_sarl() :
             
             st.markdown(f"<h4 style='text-align: center;'>!---------- Stock de départ du {datea} ----------!</h4><br>", unsafe_allow_html=True)
             
-            prom = colone[3].selectbox(" ", ["TATA 1","TATA 2"])
+            prom = colone[4].selectbox(" ", ["TATA 1","TATA 2"])
             
             statio1= statio[(statio["tata"] == prom) & (statio["Operation"] == "Stock Lundi")]
             donnee_agre = (
