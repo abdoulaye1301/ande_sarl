@@ -81,6 +81,8 @@ Team_Leader["Date"] = pd.to_datetime(Team_Leader["Date"]).dt.date
 Team_Leader["Date Remplissage"] = pd.to_datetime(Team_Leader["Date Remplissage"]).dt.date
 Team_Leader["team_leader"] = Team_Leader["team_leader"].apply(lambda x: "ALIOUNE BADARA (MANSOUR) SANE" if x == "sane_mansour" else 
                                                               ("IBRAHIMA COLY" if x=="coly_ibrahima" else x))
+Team_Leader["tata"] = Team_Leader["team_leader"].apply(lambda x: "TATA 2" if x == "ALIOUNE BADARA (MANSOUR) SANE" else 
+                                                                           ("TATA 1" if x=="coly_ibrahima" else x))
 
 #st.write(Team_Leader.head())
 
@@ -123,8 +125,7 @@ donnee_promoteur_ande = Team_Leader.merge(
     on="ID_Promoteur",
     how="left"
 )
-donnee_promoteur_ande["tata"] = donnee_promoteur_ande["team_leader"].apply(lambda x: "TATA 2" if x == "ALIOUNE BADARA (MANSOUR) SANE" else 
-                                                                           ("TATA 1" if x=="coly_ibrahima" else x))
+
 #st.write(donnee_promoteur_ande.columns.tolist())
 colonne_finale =["Date","Date Remplissage","tata","team_leader","Operation","zone","Prenom_Nom_Promoteur",
                  "Precisez","Produit","Quantites_Cartons","Montant","Transport","Stationnement","Commentaire","Numero_semaine","Mois"]
