@@ -256,7 +256,7 @@ def ande_sarl() :
             colone[0].metric("CA TATA 1", f"{donnee_ordre[donnee_ordre['tata'] =='TATA 1']['Montant A verser'].sum():,.2f}".replace(",", " ")+" XOF")
             colone[1].metric("Transport TATA 1", f"{transport[transport['tata'] == 'TATA 1']['Transport'].sum():,.0f}".replace(",", " ")+" XOF")
             colone[2].metric("Stationnement TATA 1", f"{stationnement[stationnement['tata'] == 'TATA 1']['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
-            st.write(donnee_ordre[donnee_ordre['tata'] =='TATA 1'])
+          
 
         elif sous_menu == "Stock Départ" and periode == "Semaine":
             st.markdown(f"<h4 style='text-align: center;'>!---------- Stock de départ du {datea} ----------!</h4><br>", unsafe_allow_html=True)
