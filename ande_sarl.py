@@ -703,7 +703,7 @@ def ande_sarl() :
     #-----------------------------------------------------------------#
     elif menu == "DETAIL":
         donnee = donne_vente
-        menu_sambou = colone[5].selectbox("TATAS", ["TATA 1","TATA 2"])
+        menu_sambou = colone[5].selectbox("", ["TATA 1","TATA 2"])
         donnee1 = donnee[(donnee["tata"] == menu_sambou)]
         #donnee1 = donnee.copy()
         nom_promo=donnee1["Prenom_Nom_Promoteur"].dropna().unique().tolist()
