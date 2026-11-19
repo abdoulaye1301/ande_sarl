@@ -258,7 +258,8 @@ def ande_sarl() :
             colone[2].metric("Stationnement TATA 1", f"{stationnement[stationnement['tata'] == 'TATA 1']['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
           
 
-        elif sous_menu == "Stock Départ" and periode == "Semaine":
+        elif sous_menu == "Stock Départ" :
+            periode == "Semaine"
             st.markdown(f"<h4 style='text-align: center;'>!---------- Stock de départ du {datea} ----------!</h4><br>", unsafe_allow_html=True)
             
             prom = colone[4].selectbox(" ", ["TATA 1","TATA 2"])
@@ -309,7 +310,10 @@ def ande_sarl() :
                     
                 if st.session_state.get("utilisateur") == OMAR :
                     if sous_menu=="Stock":
-                            prom = colone[3].selectbox("", ["TATA 1", "TATA 2","Tous les TATAS"])
+                            if periode == "Semaine" :
+                                prom = colone[4].selectbox("", ["TATA 1", "TATA 2","Tous les TATAS"])
+                            else :
+                                prom = colone[3].selectbox("", ["TATA 1", "TATA 2","Tous les TATAS"])
                     else:
                         prom = colone[4].selectbox("", ["TATA 1", "TATA 2","Tous les TATAS"]) 
                 elif st.session_state.get("utilisateur") == MANSOUR:
@@ -699,7 +703,7 @@ def ande_sarl() :
     #-----------------------------------------------------------------#
     elif menu == "DETAIL":
         donnee = donne_vente
-        menu_sambou = st.sidebar.selectbox("TATAS", ["TATA 1","TATA 2"])
+        menu_sambou = colone[5].selectbox("TATAS", ["TATA 1","TATA 2"])
         donnee1 = donnee[(donnee["tata"] == menu_sambou)]
         #donnee1 = donnee.copy()
         nom_promo=donnee1["Prenom_Nom_Promoteur"].dropna().unique().tolist()
