@@ -860,9 +860,7 @@ def ande_sarl() :
     elif menu == "FICHE":
         #Donnees_Mens = pd.read_excel("Donnees_Mensuelle.xlsx", engine='openpyxl')
         if periode=="Semaine":
-            if st.session_state.get("utilisateur") in [MANSOUR,IBRAHIMA] :
-                st.warning("Cette option n'est disponible que par mois")
-            elif st.session_state.get("utilisateur") == OMAR :
+            if st.session_state.get("utilisateur") == OMAR :
                 prom = colone[4].selectbox("", ["TATA 1","TATA 2"])
                 if prom == "TATA 1":
                     st.markdown(f"<h2 style='text-align: center;'>FICHE DE PAIE IBRAHIMA COLY</h2>", unsafe_allow_html=True)
@@ -1231,7 +1229,7 @@ def ande_sarl() :
                 st.markdown(f"<h2 style='text-align: center;'>MONTANT VERSER : {mnt_verser:,.2f}".replace(",", " ")+" XOF</h2>", unsafe_allow_html=True)
 
         else:
-            st.warning("Disponible uniquement en mode Semaine et mois")
+            st.warning("Disponible uniquement en mode mois")
 
 
 # ======================== GESTION DE LA CONNEXION ======================== #
