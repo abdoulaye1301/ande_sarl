@@ -865,9 +865,9 @@ def ande_sarl() :
             elif st.session_state.get("utilisateur") == OMAR :
                 prom = colone[4].selectbox("", ["TATA 1","TATA 2"])
                 if prom == "TATA 1":
-                    st.markdown(f"<h2 style='text-align: center;'>FICHE DE PAIE MANSOUR</h2>", unsafe_allow_html=True)
-                elif prom == "TATA 2":
                     st.markdown(f"<h2 style='text-align: center;'>FICHE DE PAIE IBRAHIMA COLY</h2>", unsafe_allow_html=True)
+                elif prom == "TATA 2":
+                    st.markdown(f"<h2 style='text-align: center;'>FICHE DE PAIE MANSOUR SANE</h2>", unsafe_allow_html=True)
                 Donnees_Mens = Chargement[(Chargement["Operation"] == "Vente") & (Chargement['Numero_semaine'] == semaine) & (Chargement['tata'] == prom)]
         elif periode=="Mois":
             if st.session_state.get("utilisateur") == MANSOUR :
@@ -880,9 +880,9 @@ def ande_sarl() :
                 Donnees_Mens = Chargement[(Chargement["Operation"] == "Vente") & (Chargement['Mois'] == mois) & (Chargement['tata'] == prom)]
             elif st.session_state.get("utilisateur") == OMAR :
                 prom = colone[4].selectbox("", ["TATA 1","TATA 2"])
-                if prom == "TATA 1":
+                if prom == "TATA 2":
                     st.markdown(f"<h2 style='text-align: center;'>FICHE DE PAIE MANSOUR</h2>", unsafe_allow_html=True)
-                elif prom == "TATA 2":
+                elif prom == "TATA 1":
                     st.markdown(f"<h2 style='text-align: center;'>FICHE DE PAIE IBRAHIMA COLY</h2>", unsafe_allow_html=True)
                 Donnees_Mens = Chargement[(Chargement["Operation"] == "Vente") & (Chargement['Mois'] == mois) & (Chargement['tata'] == prom)]
 
