@@ -258,11 +258,11 @@ def ande_sarl() :
             colone[2].metric("Stationnement TATA 1", f"{stationnement[stationnement['tata'] == 'TATA 1']['Stationnement'].sum():,.0f}".replace(",", " ")+" XOF")
           
 
-        elif sous_menu == "Stock Départ" :
-            periode == "Semaine"
+        elif sous_menu == "Stock Départ" and periode == "Semaine" :
+            
             st.markdown(f"<h4 style='text-align: center;'>!---------- Stock de départ du {datea} ----------!</h4><br>", unsafe_allow_html=True)
             
-            prom = colone[4].selectbox(" ", ["TATA 1","TATA 2"])
+            prom = colone[3].selectbox(" ", ["TATA 1","TATA 2"])
             
             statio1= statio[(statio["tata"] == prom) & (statio["Operation"] == "Stock Lundi")]
             donnee_agre = (
