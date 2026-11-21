@@ -468,7 +468,7 @@ def ande_sarl() :
                 else:
                     df_final_total1 = df_final_total.copy()
 
-                def generate_png_report(df, date_str, zone_str, nb_promoteurs, commentaire,chiffre_affaires):
+                def generate_png_report(df, date_str, zone_str, nb_promoteurs, commentaire,chiffre_affaires,periode):
                     fig, ax = plt.subplots(figsize=(12, len(df) * 0.6+1.5))
                     ax.axis('off')
                     if commentaire:
@@ -642,7 +642,7 @@ def ande_sarl() :
                 if not commente: 
                     commente.append("Aucune observation") 
 
-                png_bytes = generate_png_report(df_final_total1, datea, zone_str, nb_promoteurs, commente[0], ca_realise)
+                png_bytes = generate_png_report(df_final_total1, datea, zone_str, nb_promoteurs, commente[0], ca_realise,periode)
                 st.image(png_bytes, caption="", use_container_width=True)
                 st.download_button(
                     label="📥 Télécharger le rapport en PNG",
