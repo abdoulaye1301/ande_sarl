@@ -368,6 +368,9 @@ def ande_sarl() :
                     df_final['Stock Restant'] = df_final.apply(
                        lambda row: stock_descente.get((row['Produit']), 0), axis=1
                     )
+                    df_final['Montant Restant'] = df_final.apply(
+                        lambda row: montant_restant.get((row['Produit']), 0), axis=1
+                    )
                     
                 else:
                     stock_init = stock_lundi.groupby(['tata', 'Produit'])['Quantites_Cartons'].sum()
@@ -600,8 +603,8 @@ def ande_sarl() :
                         zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
                         nb_promoteurs = len(Chargement[(Chargement['tata'] == prom) & (Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
                         if st.session_state.get("utilisateur") == OMAR :
-                            if prom=="TATA 1" and nb_promoteurs < 13 :
-                                nb_promoteurs = 13
+                            if prom=="TATA 1" and nb_promoteurs < 12 :
+                                nb_promoteurs = 12
                             elif prom=="TATA 2" and nb_promoteurs < 15 :
                                 nb_promoteurs = 15
                         commente = Chargement[(Chargement['tata'] == prom) & (Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat)]["Commentaire"].dropna().unique().tolist()
