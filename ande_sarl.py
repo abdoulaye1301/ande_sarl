@@ -516,12 +516,12 @@ def ande_sarl() :
                     plt.text(0.45, 0.95, f"Rapport {prom} - ANDE", ha='center', fontsize=14, transform=ax.transAxes, weight='bold')
                     if periode=="Jour":
                         plt.text(0.01, 0.89, f"Date : {date_str}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
+                        plt.text(0.01, 0.84, f"Zone : {zone_str}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
+                        plt.text(0.01, 0.79, f"Nombre de promoteurs : {nb_promoteurs}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
                     elif periode=="Semaine":
                         plt.text(0.01, 0.89, f"Senaine : {date_str}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
                     else:
                         plt.text(0.01, 0.89, f"Mois : {date_str}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
-                    plt.text(0.01, 0.84, f"Zone : {zone_str}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
-                    plt.text(0.01, 0.79, f"Nombre de promoteurs : {nb_promoteurs}", ha='left', fontsize=12, transform=ax.transAxes, weight='bold')
                     # Logo placé au milieu, entre les informations et le commentaire
                     chemin_logo = "logo_ande.jpeg"
 
