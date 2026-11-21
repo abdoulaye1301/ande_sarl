@@ -625,6 +625,7 @@ def ande_sarl() :
                         zone_str = "Toutes les zones"
                         nb_promoteurs = len(Chargement[(Chargement["Mois"] == mois) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
                         commente = ["Rapport global Tous les TATAS"]
+                        ca_realise = Chargement[(Chargement["Mois"] == mois) & (Chargement['Operation'] == "Vente")]["Montant"].sum()
                     else:
                         zone_vals = Chargement[(Chargement['tata'] == prom) & (Chargement["Mois"] == mois)]["zone"].dropna().unique()
                         zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
