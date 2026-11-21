@@ -598,6 +598,7 @@ def ande_sarl() :
                         zone_str = "Toutes les zones"
                         nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
                         commente = ["Rapport global Tous les TATAS"]
+                        ca_realise = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat) & (Chargement['Operation'] == "Vente")]["Montant"].sum()
                     else:
                         zone_vals = Chargement[(Chargement['tata'] == prom) & (Chargement["Numero_semaine"] == semaine) & (Chargement['Date'] == dat)]["zone"].dropna().unique()
                         zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
@@ -614,6 +615,7 @@ def ande_sarl() :
                         zone_str = "Toutes les zones"
                         nb_promoteurs = len(Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Prenom_Nom_Promoteur'] != "Autre") & (Chargement['Prenom_Nom_Promoteur'].notna())]["Prenom_Nom_Promoteur"].unique())
                         commente = ["Rapport global Tous les TATAS"]
+                        ca_realise = Chargement[(Chargement["Numero_semaine"] == semaine) & (Chargement['Operation'] == "Vente")]["Montant"].sum()
                     else:
                         zone_vals = Chargement[(Chargement['tata'] == prom) & (Chargement["Numero_semaine"] == semaine)]["zone"].dropna().unique()
                         zone_str = str(zone_vals[0]) if len(zone_vals) > 0 else "Non définie"
